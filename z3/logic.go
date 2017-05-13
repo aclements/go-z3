@@ -18,7 +18,7 @@ import "runtime"
 type Bool expr
 
 func init() {
-	sortWrappers[SortBool] = func(x expr) Expr {
+	kindWrappers[KindBool] = func(x expr) Expr {
 		return Bool(x)
 	}
 }
@@ -29,7 +29,7 @@ func (ctx *Context) BoolSort() Sort {
 	ctx.do(func() {
 		csort = C.Z3_mk_bool_sort(ctx.c)
 	})
-	return wrapSort(ctx, csort, SortBool)
+	return wrapSort(ctx, csort, KindBool)
 }
 
 // FromBool returns a boolean expression with value val.

@@ -30,16 +30,16 @@ type Sort struct {
 type sortImpl struct {
 	ctx  *Context
 	c    C.Z3_sort
-	kind SortKind
+	kind Kind
 }
 
-// sortWrappers is a map of Expr constructors for each sort kind.
-var sortWrappers = make(map[SortKind]func(x expr) Expr)
+// kindWrappers is a map of Expr constructors for each sort kind.
+var kindWrappers = make(map[Kind]func(x expr) Expr)
 
-func wrapSort(ctx *Context, c C.Z3_sort, kind SortKind) Sort {
-	if kind == SortUnknown {
+func wrapSort(ctx *Context, c C.Z3_sort, kind Kind) Sort {
+	if kind == KindUnknown {
 		ctx.do(func() {
-			kind = SortKind(C.Z3_get_sort_kind(ctx.c, c))
+			kind = Kind(C.Z3_get_sort_kind(ctx.c, c))
 		})
 	}
 	impl := &sortImpl{ctx, c, kind}
@@ -64,57 +64,57 @@ func (sort Sort) String() string {
 	return res
 }
 
-// SortKind is a general category of sort, such as int or array.
-type SortKind int
+// Kind is a general category of sorts, such as int or array.
+type Kind int
 
 const (
-	SortUninterpreted = SortKind(C.Z3_UNINTERPRETED_SORT)
-	SortBool          = SortKind(C.Z3_BOOL_SORT)
-	SortInt           = SortKind(C.Z3_INT_SORT)
-	SortReal          = SortKind(C.Z3_REAL_SORT)
-	SortBV            = SortKind(C.Z3_BV_SORT)
-	SortArray         = SortKind(C.Z3_ARRAY_SORT)
-	SortDatatype      = SortKind(C.Z3_DATATYPE_SORT)
-	SortRelation      = SortKind(C.Z3_RELATION_SORT)
-	SortFiniteDomain  = SortKind(C.Z3_FINITE_DOMAIN_SORT)
-	SortFloatingPoint = SortKind(C.Z3_FLOATING_POINT_SORT)
-	SortRoundingMode  = SortKind(C.Z3_ROUNDING_MODE_SORT)
-	SortUnknown       = SortKind(C.Z3_UNKNOWN_SORT)
+	KindUninterpreted = Kind(C.Z3_UNINTERPRETED_SORT)
+	KindBool          = Kind(C.Z3_BOOL_SORT)
+	KindInt           = Kind(C.Z3_INT_SORT)
+	KindReal          = Kind(C.Z3_REAL_SORT)
+	KindBV            = Kind(C.Z3_BV_SORT)
+	KindArray         = Kind(C.Z3_ARRAY_SORT)
+	KindDatatype      = Kind(C.Z3_DATATYPE_SORT)
+	KindRelation      = Kind(C.Z3_RELATION_SORT)
+	KindFiniteDomain  = Kind(C.Z3_FINITE_DOMAIN_SORT)
+	KindFloatingPoint = Kind(C.Z3_FLOATING_POINT_SORT)
+	KindRoundingMode  = Kind(C.Z3_ROUNDING_MODE_SORT)
+	KindUnknown       = Kind(C.Z3_UNKNOWN_SORT)
 )
 
-// String returns k as a string like "SortBool".
-func (k SortKind) String() string {
+// String returns k as a string like "KindBool".
+func (k Kind) String() string {
 	switch k {
-	case SortUninterpreted:
-		return "SortUninterpreted"
-	case SortBool:
-		return "SortBool"
-	case SortInt:
-		return "SortInt"
-	case SortReal:
-		return "SortReal"
-	case SortBV:
-		return "SortBV"
-	case SortArray:
-		return "SortArray"
-	case SortDatatype:
-		return "SortDatatype"
-	case SortRelation:
-		return "SortRelation"
-	case SortFiniteDomain:
-		return "SortFiniteDomain"
-	case SortFloatingPoint:
-		return "SortFloatingPoint"
-	case SortRoundingMode:
-		return "SortRoundingMode"
-	case SortUnknown:
-		return "SortUnknown"
+	case KindUninterpreted:
+		return "KindUninterpreted"
+	case KindBool:
+		return "KindBool"
+	case KindInt:
+		return "KindInt"
+	case KindReal:
+		return "KindReal"
+	case KindBV:
+		return "KindBV"
+	case KindArray:
+		return "KindArray"
+	case KindDatatype:
+		return "KindDatatype"
+	case KindRelation:
+		return "KindRelation"
+	case KindFiniteDomain:
+		return "KindFiniteDomain"
+	case KindFloatingPoint:
+		return "KindFloatingPoint"
+	case KindRoundingMode:
+		return "KindRoundingMode"
+	case KindUnknown:
+		return "KindUnknown"
 	}
-	return "SortKind(" + strconv.Itoa(int(k)) + ")"
+	return "Kind(" + strconv.Itoa(int(k)) + ")"
 }
 
 // Kind returns s's kind.
-func (s Sort) Kind() SortKind {
+func (s Sort) Kind() Kind {
 	return s.kind
 }
 

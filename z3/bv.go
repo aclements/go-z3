@@ -26,7 +26,7 @@ import "C"
 type BV expr
 
 func init() {
-	sortWrappers[SortBV] = func(x expr) Expr {
+	kindWrappers[KindBV] = func(x expr) Expr {
 		return BV(x)
 	}
 }
@@ -37,7 +37,7 @@ func (ctx *Context) BVSort(bits int) Sort {
 	ctx.do(func() {
 		csort = C.Z3_mk_bv_sort(ctx.c, C.unsigned(bits))
 	})
-	return wrapSort(ctx, csort, SortBV)
+	return wrapSort(ctx, csort, KindBV)
 }
 
 // BVConst returns a bit-vector constant named "name" with the given

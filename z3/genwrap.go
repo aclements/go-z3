@@ -272,7 +272,7 @@ func genMethod(w *bytes.Buffer, dir *directive, label string) {
 	expr := "wrapExpr(ctx, cexpr)"
 	if dir.resType == "Expr" {
 		// Determine the concrete type dynamically.
-		fmt.Fprintf(w, " return %s.lift(SortUnknown)", expr)
+		fmt.Fprintf(w, " return %s.lift(KindUnknown)", expr)
 	} else {
 		fmt.Fprintf(w, " return %s(%s)\n", dir.resType, expr)
 	}

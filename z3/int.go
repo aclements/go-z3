@@ -20,7 +20,7 @@ import "math/big"
 type Int expr
 
 func init() {
-	sortWrappers[SortInt] = func(x expr) Expr {
+	kindWrappers[KindInt] = func(x expr) Expr {
 		return Int(x)
 	}
 }
@@ -31,7 +31,7 @@ func (ctx *Context) IntSort() Sort {
 	ctx.do(func() {
 		csort = C.Z3_mk_int_sort(ctx.c)
 	})
-	return wrapSort(ctx, csort, SortInt)
+	return wrapSort(ctx, csort, KindInt)
 }
 
 // IntConst returns a int constant named "name".

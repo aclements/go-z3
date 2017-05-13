@@ -23,7 +23,7 @@ import "C"
 type Real expr
 
 func init() {
-	sortWrappers[SortReal] = func(x expr) Expr {
+	kindWrappers[KindReal] = func(x expr) Expr {
 		return Real(x)
 	}
 }
@@ -34,7 +34,7 @@ func (ctx *Context) RealSort() Sort {
 	ctx.do(func() {
 		csort = C.Z3_mk_real_sort(ctx.c)
 	})
-	return wrapSort(ctx, csort, SortReal)
+	return wrapSort(ctx, csort, KindReal)
 }
 
 // RealConst returns a int constant named "name".

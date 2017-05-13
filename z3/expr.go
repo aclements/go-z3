@@ -96,11 +96,11 @@ func wrapExpr(ctx *Context, c C.Z3_ast) expr {
 
 // lift wraps x in the appropriate Expr type. kind must be x's kind if
 // known or otherwise SortUnknown.
-func (x expr) lift(kind SortKind) Expr {
-	if kind == SortUnknown {
+func (x expr) lift(kind Kind) Expr {
+	if kind == KindUnknown {
 		kind = x.Sort().Kind()
 	}
-	wrap, ok := sortWrappers[kind]
+	wrap, ok := kindWrappers[kind]
 	if !ok {
 		panic("expression has unknown kind " + kind.String())
 	}
@@ -192,7 +192,7 @@ func (expr *exprImpl) Sort() Sort {
 		csort = C.Z3_get_sort(expr.ctx.c, expr.c)
 	})
 	runtime.KeepAlive(expr)
-	return wrapSort(expr.ctx, csort, SortUnknown)
+	return wrapSort(expr.ctx, csort, KindUnknown)
 }
 
 func (expr *exprImpl) astKind() C.Z3_ast_kind {
@@ -208,7 +208,7 @@ func (expr *exprImpl) asBigInt() (val *big.Int, isLiteral bool) {
 	switch expr.Sort().Kind() {
 	default:
 		panic("sort " + expr.Sort().String() + " cannot be represented as a big.Int")
-	case SortInt, SortBV:
+	case KindInt, KindBV:
 	}
 	if expr.astKind() != C.Z3_NUMERAL_AST {
 		return nil, false
@@ -229,7 +229,7 @@ func (expr *exprImpl) asInt64() (val int64, isLiteral, ok bool) {
 	switch expr.Sort().Kind() {
 	default:
 		panic("sort " + expr.Sort().String() + " cannot be represented as an int64")
-	case SortInt, SortBV:
+	case KindInt, KindBV:
 	}
 	if expr.astKind() != C.Z3_NUMERAL_AST {
 		return 0, false, false
@@ -245,7 +245,7 @@ func (expr *exprImpl) asUint64() (val uint64, isLiteral, ok bool) {
 	switch expr.Sort().Kind() {
 	default:
 		panic("sort " + expr.Sort().String() + " cannot be represented as an int64")
-	case SortInt, SortBV:
+	case KindInt, KindBV:
 	}
 	if expr.astKind() != C.Z3_NUMERAL_AST {
 		return 0, false, false

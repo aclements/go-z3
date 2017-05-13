@@ -73,7 +73,7 @@ func (cond Bool) IfThenElse(cons Expr, alt Expr) Expr {
 	runtime.KeepAlive(cond)
 	runtime.KeepAlive(cons)
 	runtime.KeepAlive(alt)
-	return wrapExpr(ctx, cexpr).lift(SortUnknown)
+	return wrapExpr(ctx, cexpr).lift(KindUnknown)
 }
 
 // Iff returns an expression that is true if l and r are equal (l

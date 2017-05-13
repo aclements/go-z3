@@ -53,7 +53,7 @@ func (m *Model) Eval(expr Expr, completion bool) Expr {
 	if !ok {
 		return nil
 	}
-	return wrapExpr(m.ctx, out).lift(SortUnknown)
+	return wrapExpr(m.ctx, out).lift(KindUnknown)
 }
 
 // String returns a string representation of m.
