@@ -19,29 +19,33 @@ import "C"
 // These predicates form a stack that can be manipulated with
 // Push/Pop.
 type Solver struct {
+	*solverImpl
+	noEq
+}
+
+type solverImpl struct {
 	ctx *Context
 	c   C.Z3_solver
 }
 
 // NewSolver returns a new, empty solver.
 func NewSolver(ctx *Context) *Solver {
-	var solver *Solver
+	var impl *solverImpl
 	ctx.do(func() {
-		solver = &Solver{
+		impl = &solverImpl{
 			ctx,
 			C.Z3_mk_solver(ctx.c),
 		}
 	})
 	ctx.do(func() {
-		C.Z3_solver_inc_ref(ctx.c, solver.c)
+		C.Z3_solver_inc_ref(ctx.c, impl.c)
 	})
-	// TODO: Don't attach finalizer to a user-visible pointer.
-	runtime.SetFinalizer(solver, func(solver *Solver) {
-		solver.ctx.do(func() {
-			C.Z3_solver_dec_ref(solver.ctx.c, solver.c)
+	runtime.SetFinalizer(impl, func(impl *solverImpl) {
+		impl.ctx.do(func() {
+			C.Z3_solver_dec_ref(impl.ctx.c, impl.c)
 		})
 	})
-	return solver
+	return &Solver{impl, noEq{}}
 }
 
 // Assert adds expr to the set of predicates that must be satisfied.
