@@ -16,20 +16,33 @@ import (
 */
 import "C"
 
+// TODO: This should follow Expr and be safely copyable and use "Sort"
+// instead of "*Sort" in the API.
+
 // Sort represents the type of the Expr. A Sort can be a basic type
 // such as int or bool or a parameterized type such as a 30 bit wide
 // bit-vector or an array from int to bool.
 type Sort struct {
-	ctx *Context
-	c   C.Z3_sort
+	ctx  *Context
+	c    C.Z3_sort
+	kind SortKind
 	noEq
 }
 
-func wrapSort(ctx *Context, c C.Z3_sort) *Sort {
-	sort := &Sort{ctx, c, noEq{}}
+// sortWrappers is a map of Expr constructors for each sort kind.
+var sortWrappers = make(map[SortKind]func(x expr) Expr)
+
+func wrapSort(ctx *Context, c C.Z3_sort, kind SortKind) *Sort {
+	if kind == SortUnknown {
+		ctx.do(func() {
+			kind = SortKind(C.Z3_get_sort_kind(ctx.c, c))
+		})
+	}
+	sort := &Sort{ctx, c, kind, noEq{}}
 	ctx.lock.Lock()
 	C.Z3_inc_ref(ctx.c, C.Z3_sort_to_ast(ctx.c, c))
 	ctx.lock.Unlock()
+	// TODO: Don't put finalizer on a user-accessible type.
 	runtime.SetFinalizer(sort, func(sort *Sort) {
 		sort.ctx.do(func() {
 			C.Z3_dec_ref(sort.ctx.c, C.Z3_sort_to_ast(sort.ctx.c, sort.c))
@@ -99,12 +112,7 @@ func (k SortKind) String() string {
 
 // Kind returns s's kind.
 func (s *Sort) Kind() SortKind {
-	var ckind C.Z3_sort_kind
-	s.ctx.do(func() {
-		ckind = C.Z3_get_sort_kind(s.ctx.c, s.c)
-	})
-	runtime.KeepAlive(s)
-	return SortKind(ckind)
+	return s.kind
 }
 
 // BVSize returns the bit size of a bit-vector sort.

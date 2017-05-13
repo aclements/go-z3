@@ -24,6 +24,7 @@ func wrapModel(ctx *Context, c C.Z3_model) *Model {
 	ctx.lock.Lock()
 	C.Z3_model_inc_ref(ctx.c, c)
 	ctx.lock.Unlock()
+	// TODO: Don't attach finalizer to a user-visible pointer.
 	runtime.SetFinalizer(model, func(model *Model) {
 		model.ctx.do(func() {
 			C.Z3_model_dec_ref(model.ctx.c, model.c)
@@ -41,18 +42,18 @@ func wrapModel(ctx *Context, c C.Z3_model) *Model {
 // Eval returns nil is expr cannot be evaluated. This can happen if
 // expr contains a quantifier or is type-incorrect, or if m is a
 // partial model (that is, the option MODEL_PARTIAL was set to true).
-func (m *Model) Eval(expr *Expr, completion bool) *Expr {
+func (m *Model) Eval(expr Expr, completion bool) Expr {
 	var out C.Z3_ast
 	var ok bool
 	m.ctx.do(func() {
-		ok = z3ToBool(C.Z3_model_eval(m.ctx.c, m.c, expr.c, boolToZ3(completion), &out))
+		ok = z3ToBool(C.Z3_model_eval(m.ctx.c, m.c, expr.impl().c, boolToZ3(completion), &out))
 	})
 	runtime.KeepAlive(m)
 	runtime.KeepAlive(expr)
 	if !ok {
 		return nil
 	}
-	return wrapExpr(m.ctx, out)
+	return wrapExpr(m.ctx, out).lift(SortUnknown)
 }
 
 // String returns a string representation of m.

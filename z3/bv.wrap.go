@@ -11,25 +11,40 @@ import "runtime"
 */
 import "C"
 
-// BVNot returns the bit-wise negation of l.
-//
-// l must have bit-vector sort.
-func (l *Expr) BVNot() *Expr {
-	// Generated from bv.go:31.
+// Eq returns an expression that is true if l and r are equal.
+func (l BV) Eq(r BV) Bool {
+	ctx := l.ctx
+	var cexpr C.Z3_ast
+	ctx.do(func() {
+		cexpr = C.Z3_mk_eq(ctx.c, l.c, r.c)
+	})
+	runtime.KeepAlive(l)
+	runtime.KeepAlive(r)
+	return Bool(wrapExpr(ctx, cexpr))
+}
+
+// NE returns an expression that is true if l and r are not equal.
+func (l BV) NE(r BV) Bool {
+	return l.ctx.Distinct(l, r)
+}
+
+// Not returns the bit-wise negation of l.
+func (l BV) Not() BV {
+	// Generated from bv.go:142.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
 		cexpr = C.Z3_mk_bvnot(ctx.c, l.c)
 	})
 	runtime.KeepAlive(l)
-	return wrapExpr(ctx, cexpr)
+	return BV(wrapExpr(ctx, cexpr))
 }
 
-// BVAnd returns the bit-wise and of l and r.
+// And returns the bit-wise and of l and r.
 //
-// l and r must have the same bit-vector sort.
-func (l *Expr) BVAnd(r *Expr) *Expr {
-	// Generated from bv.go:37.
+// l and r must have the same size.
+func (l BV) And(r BV) BV {
+	// Generated from bv.go:148.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -37,14 +52,14 @@ func (l *Expr) BVAnd(r *Expr) *Expr {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return wrapExpr(ctx, cexpr)
+	return BV(wrapExpr(ctx, cexpr))
 }
 
-// BVOr returns the bit-wise or of l and r.
+// Or returns the bit-wise or of l and r.
 //
-// l and r must have the same bit-vector sort.
-func (l *Expr) BVOr(r *Expr) *Expr {
-	// Generated from bv.go:43.
+// l and r must have the same size.
+func (l BV) Or(r BV) BV {
+	// Generated from bv.go:154.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -52,14 +67,14 @@ func (l *Expr) BVOr(r *Expr) *Expr {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return wrapExpr(ctx, cexpr)
+	return BV(wrapExpr(ctx, cexpr))
 }
 
-// BVXor returns the bit-wise xor of l and r.
+// Xor returns the bit-wise xor of l and r.
 //
-// l and r must have the same bit-vector sort.
-func (l *Expr) BVXor(r *Expr) *Expr {
-	// Generated from bv.go:49.
+// l and r must have the same size.
+func (l BV) Xor(r BV) BV {
+	// Generated from bv.go:160.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -67,14 +82,14 @@ func (l *Expr) BVXor(r *Expr) *Expr {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return wrapExpr(ctx, cexpr)
+	return BV(wrapExpr(ctx, cexpr))
 }
 
-// BVNand returns the bit-wise nand of l and r.
+// Nand returns the bit-wise nand of l and r.
 //
-// l and r must have the same bit-vector sort.
-func (l *Expr) BVNand(r *Expr) *Expr {
-	// Generated from bv.go:55.
+// l and r must have the same size.
+func (l BV) Nand(r BV) BV {
+	// Generated from bv.go:166.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -82,14 +97,14 @@ func (l *Expr) BVNand(r *Expr) *Expr {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return wrapExpr(ctx, cexpr)
+	return BV(wrapExpr(ctx, cexpr))
 }
 
-// BVNor returns the bit-wise nor of l and r.
+// Nor returns the bit-wise nor of l and r.
 //
-// l and r must have the same bit-vector sort.
-func (l *Expr) BVNor(r *Expr) *Expr {
-	// Generated from bv.go:61.
+// l and r must have the same size.
+func (l BV) Nor(r BV) BV {
+	// Generated from bv.go:172.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -97,14 +112,14 @@ func (l *Expr) BVNor(r *Expr) *Expr {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return wrapExpr(ctx, cexpr)
+	return BV(wrapExpr(ctx, cexpr))
 }
 
-// BVXnor returns the bit-wise xnor of l and r.
+// Xnor returns the bit-wise xnor of l and r.
 //
-// l and r must have the same bit-vector sort.
-func (l *Expr) BVXnor(r *Expr) *Expr {
-	// Generated from bv.go:67.
+// l and r must have the same size.
+func (l BV) Xnor(r BV) BV {
+	// Generated from bv.go:178.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -112,28 +127,26 @@ func (l *Expr) BVXnor(r *Expr) *Expr {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return wrapExpr(ctx, cexpr)
+	return BV(wrapExpr(ctx, cexpr))
 }
 
-// BVNeg returns the two's complement negation of l.
-//
-// l must have bit-vector sort.
-func (l *Expr) BVNeg() *Expr {
-	// Generated from bv.go:73.
+// Neg returns the two's complement negation of l.
+func (l BV) Neg() BV {
+	// Generated from bv.go:182.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
 		cexpr = C.Z3_mk_bvneg(ctx.c, l.c)
 	})
 	runtime.KeepAlive(l)
-	return wrapExpr(ctx, cexpr)
+	return BV(wrapExpr(ctx, cexpr))
 }
 
-// BVAdd returns the two's complement sum of l and r.
+// Add returns the two's complement sum of l and r.
 //
-// l and r must have the same bit-vector sort.
-func (l *Expr) BVAdd(r *Expr) *Expr {
-	// Generated from bv.go:79.
+// l and r must have the same size.
+func (l BV) Add(r BV) BV {
+	// Generated from bv.go:188.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -141,14 +154,14 @@ func (l *Expr) BVAdd(r *Expr) *Expr {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return wrapExpr(ctx, cexpr)
+	return BV(wrapExpr(ctx, cexpr))
 }
 
-// BVSub returns the two's complement subtraction l minus r.
+// Sub returns the two's complement subtraction l minus r.
 //
-// l and r must have the same bit-vector sort.
-func (l *Expr) BVSub(r *Expr) *Expr {
-	// Generated from bv.go:85.
+// l and r must have the same size.
+func (l BV) Sub(r BV) BV {
+	// Generated from bv.go:194.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -156,14 +169,14 @@ func (l *Expr) BVSub(r *Expr) *Expr {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return wrapExpr(ctx, cexpr)
+	return BV(wrapExpr(ctx, cexpr))
 }
 
-// BVMul returns the two's complement product of l and r.
+// Mul returns the two's complement product of l and r.
 //
-// l and r must have the same bit-vector sort.
-func (l *Expr) BVMul(r *Expr) *Expr {
-	// Generated from bv.go:91.
+// l and r must have the same size.
+func (l BV) Mul(r BV) BV {
+	// Generated from bv.go:200.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -171,14 +184,14 @@ func (l *Expr) BVMul(r *Expr) *Expr {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return wrapExpr(ctx, cexpr)
+	return BV(wrapExpr(ctx, cexpr))
 }
 
-// BVUDiv returns the unsigned division of l over r.
+// UDiv returns the unsigned quotient of l divided by r.
 //
-// l and r must have the same bit-vector sort.
-func (l *Expr) BVUDiv(r *Expr) *Expr {
-	// Generated from bv.go:97.
+// l and r must have the same size.
+func (l BV) UDiv(r BV) BV {
+	// Generated from bv.go:206.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -186,14 +199,14 @@ func (l *Expr) BVUDiv(r *Expr) *Expr {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return wrapExpr(ctx, cexpr)
+	return BV(wrapExpr(ctx, cexpr))
 }
 
-// BVSDiv returns the two's complement signed division of l over r.
+// SDiv returns the two's complement signed quotient of l divided by r.
 //
-// l and r must have the same bit-vector sort.
-func (l *Expr) BVSDiv(r *Expr) *Expr {
-	// Generated from bv.go:103.
+// l and r must have the same size.
+func (l BV) SDiv(r BV) BV {
+	// Generated from bv.go:212.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -201,14 +214,14 @@ func (l *Expr) BVSDiv(r *Expr) *Expr {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return wrapExpr(ctx, cexpr)
+	return BV(wrapExpr(ctx, cexpr))
 }
 
-// BVURem returns the unsigned remainder of l divided by r.
+// URem returns the unsigned remainder of l divided by r.
 //
-// l and r must have the same bit-vector sort.
-func (l *Expr) BVURem(r *Expr) *Expr {
-	// Generated from bv.go:109.
+// l and r must have the same size.
+func (l BV) URem(r BV) BV {
+	// Generated from bv.go:218.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -216,16 +229,16 @@ func (l *Expr) BVURem(r *Expr) *Expr {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return wrapExpr(ctx, cexpr)
+	return BV(wrapExpr(ctx, cexpr))
 }
 
-// BVSRem returns the two's complement signed remainder of l divided by r.
+// SRem returns the two's complement signed remainder of l divided by r.
 //
 // The sign of the result follows the sign of l.
 //
-// l and r must have the same bit-vector sort.
-func (l *Expr) BVSRem(r *Expr) *Expr {
-	// Generated from bv.go:117.
+// l and r must have the same size.
+func (l BV) SRem(r BV) BV {
+	// Generated from bv.go:226.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -233,16 +246,16 @@ func (l *Expr) BVSRem(r *Expr) *Expr {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return wrapExpr(ctx, cexpr)
+	return BV(wrapExpr(ctx, cexpr))
 }
 
-// BVSMod returns the two's complement signed modulus of l divided by r.
+// SMod returns the two's complement signed modulus of l divided by r.
 //
 // The sign of the result follows the sign of r.
 //
-// l and r must have the same bit-vector sort.
-func (l *Expr) BVSMod(r *Expr) *Expr {
-	// Generated from bv.go:125.
+// l and r must have the same size.
+func (l BV) SMod(r BV) BV {
+	// Generated from bv.go:234.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -250,14 +263,14 @@ func (l *Expr) BVSMod(r *Expr) *Expr {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return wrapExpr(ctx, cexpr)
+	return BV(wrapExpr(ctx, cexpr))
 }
 
-// BVULT returns the l < r, where l and r are unsigned.
+// ULT returns the l < r, where l and r are unsigned.
 //
-// l and r must have the same bit-vector sort.
-func (l *Expr) BVULT(r *Expr) *Expr {
-	// Generated from bv.go:131.
+// l and r must have the same size.
+func (l BV) ULT(r BV) Bool {
+	// Generated from bv.go:240.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -265,14 +278,14 @@ func (l *Expr) BVULT(r *Expr) *Expr {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return wrapExpr(ctx, cexpr)
+	return Bool(wrapExpr(ctx, cexpr))
 }
 
-// BVSLT returns the l < r, where l and r are signed.
+// SLT returns the l < r, where l and r are signed.
 //
-// l and r must have the same bit-vector sort.
-func (l *Expr) BVSLT(r *Expr) *Expr {
-	// Generated from bv.go:137.
+// l and r must have the same size.
+func (l BV) SLT(r BV) Bool {
+	// Generated from bv.go:246.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -280,14 +293,14 @@ func (l *Expr) BVSLT(r *Expr) *Expr {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return wrapExpr(ctx, cexpr)
+	return Bool(wrapExpr(ctx, cexpr))
 }
 
-// BVULE returns the l <= r, where l and r are unsigned.
+// ULE returns the l <= r, where l and r are unsigned.
 //
-// l and r must have the same bit-vector sort.
-func (l *Expr) BVULE(r *Expr) *Expr {
-	// Generated from bv.go:143.
+// l and r must have the same size.
+func (l BV) ULE(r BV) Bool {
+	// Generated from bv.go:252.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -295,14 +308,14 @@ func (l *Expr) BVULE(r *Expr) *Expr {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return wrapExpr(ctx, cexpr)
+	return Bool(wrapExpr(ctx, cexpr))
 }
 
-// BVSLE returns the l <= r, where l and r are signed.
+// SLE returns the l <= r, where l and r are signed.
 //
-// l and r must have the same bit-vector sort.
-func (l *Expr) BVSLE(r *Expr) *Expr {
-	// Generated from bv.go:149.
+// l and r must have the same size.
+func (l BV) SLE(r BV) Bool {
+	// Generated from bv.go:258.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -310,14 +323,14 @@ func (l *Expr) BVSLE(r *Expr) *Expr {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return wrapExpr(ctx, cexpr)
+	return Bool(wrapExpr(ctx, cexpr))
 }
 
-// BVUGE returns the l >= r, where l and r are unsigned.
+// UGE returns the l >= r, where l and r are unsigned.
 //
-// l and r must have the same bit-vector sort.
-func (l *Expr) BVUGE(r *Expr) *Expr {
-	// Generated from bv.go:155.
+// l and r must have the same size.
+func (l BV) UGE(r BV) Bool {
+	// Generated from bv.go:264.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -325,14 +338,14 @@ func (l *Expr) BVUGE(r *Expr) *Expr {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return wrapExpr(ctx, cexpr)
+	return Bool(wrapExpr(ctx, cexpr))
 }
 
-// BVSGE returns the l >= r, where l and r are signed.
+// SGE returns the l >= r, where l and r are signed.
 //
-// l and r must have the same bit-vector sort.
-func (l *Expr) BVSGE(r *Expr) *Expr {
-	// Generated from bv.go:161.
+// l and r must have the same size.
+func (l BV) SGE(r BV) Bool {
+	// Generated from bv.go:270.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -340,14 +353,14 @@ func (l *Expr) BVSGE(r *Expr) *Expr {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return wrapExpr(ctx, cexpr)
+	return Bool(wrapExpr(ctx, cexpr))
 }
 
-// BVUGT returns the l > r, where l and r are unsigned.
+// UGT returns the l > r, where l and r are unsigned.
 //
-// l and r must have the same bit-vector sort.
-func (l *Expr) BVUGT(r *Expr) *Expr {
-	// Generated from bv.go:167.
+// l and r must have the same size.
+func (l BV) UGT(r BV) Bool {
+	// Generated from bv.go:276.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -355,14 +368,14 @@ func (l *Expr) BVUGT(r *Expr) *Expr {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return wrapExpr(ctx, cexpr)
+	return Bool(wrapExpr(ctx, cexpr))
 }
 
-// BVSGT returns the l > r, where l and r are signed.
+// SGT returns the l > r, where l and r are signed.
 //
-// l and r must have the same bit-vector sort.
-func (l *Expr) BVSGT(r *Expr) *Expr {
-	// Generated from bv.go:173.
+// l and r must have the same size.
+func (l BV) SGT(r BV) Bool {
+	// Generated from bv.go:282.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -370,15 +383,15 @@ func (l *Expr) BVSGT(r *Expr) *Expr {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return wrapExpr(ctx, cexpr)
+	return Bool(wrapExpr(ctx, cexpr))
 }
 
-// BVConcat returns concatenation of l and r.
+// Concat returns concatenation of l and r.
 //
-// l and r must have bit-vector sort. The result is a bit-vector whose
-// length is the sum of the lengths of l and r.
-func (l *Expr) BVConcat(r *Expr) *Expr {
-	// Generated from bv.go:180.
+// The result is a bit-vector whose length is the sum of the lengths
+// of l and r.
+func (l BV) Concat(r BV) BV {
+	// Generated from bv.go:289.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -386,76 +399,67 @@ func (l *Expr) BVConcat(r *Expr) *Expr {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return wrapExpr(ctx, cexpr)
+	return BV(wrapExpr(ctx, cexpr))
 }
 
-// BVExtract returns bits [high, low] (inclusive) of l, where bit 0 is
+// Extract returns bits [high, low] (inclusive) of l, where bit 0 is
 // the least significant bit.
-//
-// l must have bit-vector sort.
-func (l *Expr) BVExtract(high int, low int) *Expr {
-	// Generated from bv.go:187.
+func (l BV) Extract(high int, low int) BV {
+	// Generated from bv.go:294.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
 		cexpr = C.Z3_mk_extract(ctx.c, C.unsigned(high), C.unsigned(low), l.c)
 	})
 	runtime.KeepAlive(l)
-	return wrapExpr(ctx, cexpr)
+	return BV(wrapExpr(ctx, cexpr))
 }
 
-// BVSignExtend returns l sign-extended to a bit-vector of length m+i,
+// SignExtend returns l sign-extended to a bit-vector of length m+i,
 // where m is the length of l.
-//
-// l must have bit-vector sort.
-func (l *Expr) BVSignExtend(i int) *Expr {
-	// Generated from bv.go:194.
+func (l BV) SignExtend(i int) BV {
+	// Generated from bv.go:299.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
 		cexpr = C.Z3_mk_sign_ext(ctx.c, C.unsigned(i), l.c)
 	})
 	runtime.KeepAlive(l)
-	return wrapExpr(ctx, cexpr)
+	return BV(wrapExpr(ctx, cexpr))
 }
 
-// BVZeroExtend returns l zero-extended to a bit-vector of length m+i,
+// ZeroExtend returns l zero-extended to a bit-vector of length m+i,
 // where m is the length of l.
-//
-// l must have bit-vector sort.
-func (l *Expr) BVZeroExtend(i int) *Expr {
-	// Generated from bv.go:201.
+func (l BV) ZeroExtend(i int) BV {
+	// Generated from bv.go:304.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
 		cexpr = C.Z3_mk_zero_ext(ctx.c, C.unsigned(i), l.c)
 	})
 	runtime.KeepAlive(l)
-	return wrapExpr(ctx, cexpr)
+	return BV(wrapExpr(ctx, cexpr))
 }
 
-// BVRepeat returns l repeated up to length i.
-//
-// l must have bit-vector sort.
-func (l *Expr) BVRepeat(i int) *Expr {
-	// Generated from bv.go:207.
+// Repeat returns l repeated up to length i.
+func (l BV) Repeat(i int) BV {
+	// Generated from bv.go:308.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
 		cexpr = C.Z3_mk_repeat(ctx.c, C.unsigned(i), l.c)
 	})
 	runtime.KeepAlive(l)
-	return wrapExpr(ctx, cexpr)
+	return BV(wrapExpr(ctx, cexpr))
 }
 
-// BVShiftLeft returns l shifted left by i bits.
+// Lsh returns l shifted left by i bits.
 //
 // This is equivalent to l * 2^i.
 //
-// l and i must have the same bit-vector sort. The result has the same
-// sort.
-func (l *Expr) BVShiftLeft(i *Expr) *Expr {
-	// Generated from bv.go:216.
+// l and i must have the same size. The result has the same sort.
+func (l BV) Lsh(i BV) BV {
+	// Generated from bv.go:316.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -463,17 +467,16 @@ func (l *Expr) BVShiftLeft(i *Expr) *Expr {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(i)
-	return wrapExpr(ctx, cexpr)
+	return BV(wrapExpr(ctx, cexpr))
 }
 
-// BVShiftRightLogical returns l logically shifted right by i bits.
+// URsh returns l logically shifted right by i bits.
 //
 // This is equivalent to l / 2^i, where l and i are unsigned.
 //
-// l and i must have the same bit-vector sort. The result has the same
-// sort.
-func (l *Expr) BVShiftRightLogical(i *Expr) *Expr {
-	// Generated from bv.go:225.
+// l and i must have the same size. The result has the same sort.
+func (l BV) URsh(i BV) BV {
+	// Generated from bv.go:324.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -481,18 +484,16 @@ func (l *Expr) BVShiftRightLogical(i *Expr) *Expr {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(i)
-	return wrapExpr(ctx, cexpr)
+	return BV(wrapExpr(ctx, cexpr))
 }
 
-// BVShiftRightArithmetic returns l arithmetically shifted right by i bits.
+// SRsh returns l arithmetically shifted right by i bits.
 //
-// This is like BVShiftRightLogical, but the sign of the result is the
-// sign of l.
+// This is like URsh, but the sign of the result is the sign of l.
 //
-// l and i must have the same bit-vector sort. The result has the same
-// sort.
-func (l *Expr) BVShiftRightArithmetic(i *Expr) *Expr {
-	// Generated from bv.go:235.
+// l and i must have the same size. The result has the same sort.
+func (l BV) SRsh(i BV) BV {
+	// Generated from bv.go:332.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -500,14 +501,14 @@ func (l *Expr) BVShiftRightArithmetic(i *Expr) *Expr {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(i)
-	return wrapExpr(ctx, cexpr)
+	return BV(wrapExpr(ctx, cexpr))
 }
 
-// BVRotateLeft returns l rotated left by i bits.
+// RotateLeft returns l rotated left by i bits.
 //
-// l and i must have the same bit-vector sort.
-func (l *Expr) BVRotateLeft(i *Expr) *Expr {
-	// Generated from bv.go:241.
+// l and i must have the same size.
+func (l BV) RotateLeft(i BV) BV {
+	// Generated from bv.go:338.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -515,14 +516,14 @@ func (l *Expr) BVRotateLeft(i *Expr) *Expr {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(i)
-	return wrapExpr(ctx, cexpr)
+	return BV(wrapExpr(ctx, cexpr))
 }
 
-// BVRotateRight returns l rotated right by i bits.
+// RotateRight returns l rotated right by i bits.
 //
-// l and i must have the same bit-vector sort.
-func (l *Expr) BVRotateRight(i *Expr) *Expr {
-	// Generated from bv.go:247.
+// l and i must have the same size.
+func (l BV) RotateRight(i BV) BV {
+	// Generated from bv.go:344.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -530,47 +531,5 @@ func (l *Expr) BVRotateRight(i *Expr) *Expr {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(i)
-	return wrapExpr(ctx, cexpr)
-}
-
-// Int2BV converts integer l to a bit-vector of width bits.
-//
-// l must have integer sort.
-func (l *Expr) Int2BV(bits int) *Expr {
-	// Generated from bv.go:253.
-	ctx := l.ctx
-	var cexpr C.Z3_ast
-	ctx.do(func() {
-		cexpr = C.Z3_mk_int2bv(ctx.c, C.unsigned(bits), l.c)
-	})
-	runtime.KeepAlive(l)
-	return wrapExpr(ctx, cexpr)
-}
-
-// BVS2Int converts signed bit-vector l to an integer.
-//
-// l must have bit-vector sort.
-func (l *Expr) BVS2Int() *Expr {
-	// Generated from bv.go:259.
-	ctx := l.ctx
-	var cexpr C.Z3_ast
-	ctx.do(func() {
-		cexpr = C.Z3_mk_bv2int(ctx.c, l.c, C.Z3_bool(1))
-	})
-	runtime.KeepAlive(l)
-	return wrapExpr(ctx, cexpr)
-}
-
-// BVU2Int converts unsigned bit-vector l to an integer.
-//
-// l must have bit-vector sort.
-func (l *Expr) BVU2Int() *Expr {
-	// Generated from bv.go:265.
-	ctx := l.ctx
-	var cexpr C.Z3_ast
-	ctx.do(func() {
-		cexpr = C.Z3_mk_bv2int(ctx.c, l.c, C.Z3_bool(0))
-	})
-	runtime.KeepAlive(l)
-	return wrapExpr(ctx, cexpr)
+	return BV(wrapExpr(ctx, cexpr))
 }

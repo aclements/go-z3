@@ -35,6 +35,7 @@ func NewSolver(ctx *Context) *Solver {
 	ctx.do(func() {
 		C.Z3_solver_inc_ref(ctx.c, solver.c)
 	})
+	// TODO: Don't attach finalizer to a user-visible pointer.
 	runtime.SetFinalizer(solver, func(solver *Solver) {
 		solver.ctx.do(func() {
 			C.Z3_solver_dec_ref(solver.ctx.c, solver.c)
@@ -44,9 +45,7 @@ func NewSolver(ctx *Context) *Solver {
 }
 
 // Assert adds expr to the set of predicates that must be satisfied.
-//
-// expr must have boolean sort.
-func (s *Solver) Assert(expr *Expr) {
+func (s *Solver) Assert(expr Bool) {
 	s.ctx.do(func() {
 		C.Z3_solver_assert(s.ctx.c, s.c, expr.c)
 	})

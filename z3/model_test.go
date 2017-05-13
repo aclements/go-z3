@@ -21,7 +21,7 @@ func TestModel(t *testing.T) {
 	}
 
 	m := s.Model()
-	x, y = m.Eval(x, false), m.Eval(y, false)
+	x, y = m.Eval(x, false).(Bool), m.Eval(y, false).(Bool)
 	xval, xok := x.AsBool()
 	yval, yok := y.AsBool()
 	if !(xval && xok && !yval && yok) {

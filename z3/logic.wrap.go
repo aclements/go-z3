@@ -11,11 +11,8 @@ import "runtime"
 */
 import "C"
 
-// Eq returns a boolean expression that is true if l and r are equal.
-//
-// l and r must have the same sort.
-func (l *Expr) Eq(r *Expr) *Expr {
-	// Generated from logic.go:43.
+// Eq returns an expression that is true if l and r are equal.
+func (l Bool) Eq(r Bool) Bool {
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -23,64 +20,66 @@ func (l *Expr) Eq(r *Expr) *Expr {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return wrapExpr(ctx, cexpr)
+	return Bool(wrapExpr(ctx, cexpr))
+}
+
+// NE returns an expression that is true if l and r are not equal.
+func (l Bool) NE(r Bool) Bool {
+	return l.ctx.Distinct(l, r)
 }
 
 // Distinct returns a boolean expression that is true if no two exprs
 // are equal.
 //
 // All expressions in exprs must have the same sort.
-func (ctx *Context) Distinct(exprs ...*Expr) *Expr {
-	// Generated from logic.go:50.
+func (ctx *Context) Distinct(exprs ...Expr) Bool {
+	// Generated from logic.go:71.
 	cargs := make([]C.Z3_ast, len(exprs)+0)
 	for i, arg := range exprs {
-		cargs[i+0] = arg.c
+		cargs[i+0] = arg.impl().c
 	}
 	var cexpr C.Z3_ast
 	ctx.do(func() {
 		cexpr = C.Z3_mk_distinct(ctx.c, C.uint(len(cargs)), &cargs[0])
 	})
 	runtime.KeepAlive(&cargs[0])
-	return wrapExpr(ctx, cexpr)
+	return Bool(wrapExpr(ctx, cexpr))
 }
 
 // Not returns the boolean negation of l.
-//
-// l must have boolean sort.
-func (l *Expr) Not() *Expr {
-	// Generated from logic.go:56.
+func (l Bool) Not() Bool {
+	// Generated from logic.go:75.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
 		cexpr = C.Z3_mk_not(ctx.c, l.c)
 	})
 	runtime.KeepAlive(l)
-	return wrapExpr(ctx, cexpr)
+	return Bool(wrapExpr(ctx, cexpr))
 }
 
 // IfThenElse returns an expression whose value is cons is cond is
 // true, otherwise alt.
 //
-// cond must have boolean sort. cons and alt must have the same sort.
-func (cond *Expr) IfThenElse(cons *Expr, alt *Expr) *Expr {
-	// Generated from logic.go:63.
+// cons and alt must have the same sort. The result will have the same
+// sort as cons and alt.
+func (cond Bool) IfThenElse(cons Expr, alt Expr) Expr {
+	// Generated from logic.go:83.
 	ctx := cond.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
-		cexpr = C.Z3_mk_ite(ctx.c, cond.c, cons.c, alt.c)
+		cexpr = C.Z3_mk_ite(ctx.c, cond.c, cons.impl().c, alt.impl().c)
 	})
 	runtime.KeepAlive(cond)
 	runtime.KeepAlive(cons)
 	runtime.KeepAlive(alt)
-	return wrapExpr(ctx, cexpr)
+	return wrapExpr(ctx, cexpr).lift(SortUnknown)
 }
 
 // Iff returns an expression that is true if l and r are equal (l
 // if-and-only-if r).
-//
-// l and r must have boolean sort.
-func (l *Expr) Iff(r *Expr) *Expr {
-	// Generated from logic.go:70.
+func (l Bool) Iff(r Bool) Bool {
+	// Generated from logic.go:88.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -88,14 +87,12 @@ func (l *Expr) Iff(r *Expr) *Expr {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return wrapExpr(ctx, cexpr)
+	return Bool(wrapExpr(ctx, cexpr))
 }
 
 // Implies returns an expression that is true if l implies r.
-//
-// l and r must have boolean sort.
-func (l *Expr) Implies(r *Expr) *Expr {
-	// Generated from logic.go:76.
+func (l Bool) Implies(r Bool) Bool {
+	// Generated from logic.go:92.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -103,14 +100,12 @@ func (l *Expr) Implies(r *Expr) *Expr {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return wrapExpr(ctx, cexpr)
+	return Bool(wrapExpr(ctx, cexpr))
 }
 
 // Xor returns an expression that is true if l xor r.
-//
-// l and r must have boolean sort.
-func (l *Expr) Xor(r *Expr) *Expr {
-	// Generated from logic.go:82.
+func (l Bool) Xor(r Bool) Bool {
+	// Generated from logic.go:96.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -118,15 +113,13 @@ func (l *Expr) Xor(r *Expr) *Expr {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return wrapExpr(ctx, cexpr)
+	return Bool(wrapExpr(ctx, cexpr))
 }
 
 // And returns an expression that is true if l and all arguments are
 // true.
-//
-// All arguments must have boolean sort.
-func (l *Expr) And(r ...*Expr) *Expr {
-	// Generated from logic.go:89.
+func (l Bool) And(r ...Bool) Bool {
+	// Generated from logic.go:101.
 	ctx := l.ctx
 	cargs := make([]C.Z3_ast, len(r)+1)
 	cargs[0] = l.c
@@ -138,14 +131,12 @@ func (l *Expr) And(r ...*Expr) *Expr {
 		cexpr = C.Z3_mk_and(ctx.c, C.uint(len(cargs)), &cargs[0])
 	})
 	runtime.KeepAlive(&cargs[0])
-	return wrapExpr(ctx, cexpr)
+	return Bool(wrapExpr(ctx, cexpr))
 }
 
 // Or returns an expression that is true if l or any argument is true.
-//
-// All arguments must have boolean sort.
-func (l *Expr) Or(r ...*Expr) *Expr {
-	// Generated from logic.go:95.
+func (l Bool) Or(r ...Bool) Bool {
+	// Generated from logic.go:105.
 	ctx := l.ctx
 	cargs := make([]C.Z3_ast, len(r)+1)
 	cargs[0] = l.c
@@ -157,5 +148,5 @@ func (l *Expr) Or(r ...*Expr) *Expr {
 		cexpr = C.Z3_mk_or(ctx.c, C.uint(len(cargs)), &cargs[0])
 	})
 	runtime.KeepAlive(&cargs[0])
-	return wrapExpr(ctx, cexpr)
+	return Bool(wrapExpr(ctx, cexpr))
 }

@@ -16,29 +16,43 @@ import (
 */
 import "C"
 
-// BVSort returns a bit-vector sort (type) of the given width in bits.
+// BV is an expression with bit-vector sort.
+//
+// Bit vectors correspond to machine words. They have finite domains
+// of size 2^n and implement modular arithmetic in both unsigned and
+// two's complement signed forms.
+//
+// BV implements Expr.
+type BV expr
+
+func init() {
+	sortWrappers[SortBV] = func(x expr) Expr {
+		return BV(x)
+	}
+}
+
+// BVSort returns a bit-vector sort of the given width in bits.
 func (ctx *Context) BVSort(bits int) *Sort {
 	var csort C.Z3_sort
 	ctx.do(func() {
 		csort = C.Z3_mk_bv_sort(ctx.c, C.unsigned(bits))
 	})
-	return wrapSort(ctx, csort)
+	return wrapSort(ctx, csort, SortBV)
 }
 
 // BVConst returns a bit-vector constant named "name" with the given
 // width in bits.
-func (ctx *Context) BVConst(name string, bits int) *Expr {
-	return ctx.Const(name, ctx.BVSort(bits))
+func (ctx *Context) BVConst(name string, bits int) BV {
+	return ctx.Const(name, ctx.BVSort(bits)).(BV)
 }
 
-// BVSAsBig returns the value of expr as a math/big.Int, interpreting
-// expr as a signed two's complement number. expr must be a
-// bit-vector. If expr is a bit-vector, but not constant, this returns
-// nil.
-func (expr *Expr) BVSAsBig() *big.Int {
-	v := expr.BVUAsBig()
+// AsBigSigned returns the value of expr as a math/big.Int,
+// interpreting expr as a signed two's complement number. If expr is
+// not constant, it returns nil, false.
+func (expr BV) AsBigSigned() (val *big.Int, isConst bool) {
+	v, isConst := expr.AsBigUnsigned()
 	if v == nil {
-		return nil
+		return v, isConst
 	}
 	size := expr.Sort().BVSize()
 	if v.Bit(size-1) != 0 {
@@ -46,16 +60,16 @@ func (expr *Expr) BVSAsBig() *big.Int {
 		shift.Lsh(shift, uint(size))
 		v.Sub(v, shift)
 	}
-	return v
+	return v, true
 }
 
-// BVUAsBig is like BVSAsBig, but interprets expr as unsigned.
-func (expr *Expr) BVUAsBig() *big.Int {
+// AsBigUnsigned is like AsBigSigned, but interprets expr as unsigned.
+func (expr BV) AsBigUnsigned() (val *big.Int, isConst bool) {
 	if expr.Sort().Kind() != SortBV {
 		panic("not a bit-vector")
 	}
 	if expr.astKind() != C.Z3_NUMERAL_AST {
-		return nil
+		return nil, false
 	}
 	var str string
 	expr.ctx.do(func() {
@@ -66,21 +80,20 @@ func (expr *Expr) BVUAsBig() *big.Int {
 	if _, ok := v.SetString(str, 10); !ok {
 		panic("failed to parse numeral string")
 	}
-	return &v
+	return &v, true
 }
 
-// BVAsInt returns the value of expr as an int64, interpreting expr as
-// a two's complement signed number. expr must be a bit-vector. If
-// expr is a bit-vector, but not constant, it returns 0, false, false.
-// If expr is a constant bit-vector, but its value cannot be
+// AsInt64 returns the value of expr as an int64, interpreting expr as a
+// two's complement signed number. If expr is not constant, it returns
+// 0, false, false. If expr is constant, but its value cannot be
 // represented as an int64, it returns 0, true, false.
-func (expr *Expr) BVAsInt() (val int64, isConst, ok bool) {
+func (expr BV) AsInt64() (val int64, isConst, ok bool) {
 	// Oddly, Z3_get_numeral_int64 interprets the number as
 	// unsigned, which makes no sense since the API is strictly
 	// less useful than Z3_get_numeral_uint64 and doesn't mirror
 	// Z3_mk_int64. So, use Z3_get_numeral_uint64 and sign extend
 	// it ourselves.
-	uval, isConst, ok := expr.BVAsUint()
+	uval, isConst, ok := expr.AsUint64()
 	if !isConst {
 		return 0, isConst, ok
 	}
@@ -96,7 +109,7 @@ func (expr *Expr) BVAsInt() (val int64, isConst, ok bool) {
 	}
 	// It may have overflowed uint64 just because of sign bits.
 	// Take the slow path.
-	bigVal := expr.BVSAsBig()
+	bigVal, _ := expr.AsBigSigned()
 	if bigVal.Cmp(big.NewInt(math.MaxInt64)) > 0 {
 		return 0, true, false
 	}
@@ -106,9 +119,9 @@ func (expr *Expr) BVAsInt() (val int64, isConst, ok bool) {
 	return bigVal.Int64(), true, true
 }
 
-// BVAsUint is like BVAsInt, but interprets expr as unsigned and fails
+// AsUint64 is like AsInt64, but interprets expr as unsigned and fails
 // if expr cannot be represented as a uint64.
-func (expr *Expr) BVAsUint() (val uint64, isConst, ok bool) {
+func (expr BV) AsUint64() (val uint64, isConst, ok bool) {
 	if expr.Sort().Kind() != SortBV {
 		panic("not a bit-vector")
 	}
@@ -122,246 +135,228 @@ func (expr *Expr) BVAsUint() (val uint64, isConst, ok bool) {
 	return uint64(cval), true, ok
 }
 
-//go:generate go run genwrap.go -- $GOFILE
+//go:generate go run genwrap.go -t BV $GOFILE
 
-// BVNot returns the bit-wise negation of l.
+// Not returns the bit-wise negation of l.
 //
-// l must have bit-vector sort.
-//
-//wrap:expr BVNot Z3_mk_bvnot l
+//wrap:expr Not Z3_mk_bvnot l
 
-// BVAnd returns the bit-wise and of l and r.
+// And returns the bit-wise and of l and r.
 //
-// l and r must have the same bit-vector sort.
+// l and r must have the same size.
 //
-//wrap:expr BVAnd Z3_mk_bvand l r
+//wrap:expr And Z3_mk_bvand l r
 
-// BVOr returns the bit-wise or of l and r.
+// Or returns the bit-wise or of l and r.
 //
-// l and r must have the same bit-vector sort.
+// l and r must have the same size.
 //
-//wrap:expr BVOr Z3_mk_bvor l r
+//wrap:expr Or Z3_mk_bvor l r
 
-// BVXor returns the bit-wise xor of l and r.
+// Xor returns the bit-wise xor of l and r.
 //
-// l and r must have the same bit-vector sort.
+// l and r must have the same size.
 //
-//wrap:expr BVXor Z3_mk_bvxor l r
+//wrap:expr Xor Z3_mk_bvxor l r
 
-// BVNand returns the bit-wise nand of l and r.
+// Nand returns the bit-wise nand of l and r.
 //
-// l and r must have the same bit-vector sort.
+// l and r must have the same size.
 //
-//wrap:expr BVNand Z3_mk_bvnand l r
+//wrap:expr Nand Z3_mk_bvnand l r
 
-// BVNor returns the bit-wise nor of l and r.
+// Nor returns the bit-wise nor of l and r.
 //
-// l and r must have the same bit-vector sort.
+// l and r must have the same size.
 //
-//wrap:expr BVNor Z3_mk_bvnor l r
+//wrap:expr Nor Z3_mk_bvnor l r
 
-// BVXnor returns the bit-wise xnor of l and r.
+// Xnor returns the bit-wise xnor of l and r.
 //
-// l and r must have the same bit-vector sort.
+// l and r must have the same size.
 //
-//wrap:expr BVXnor Z3_mk_bvxnor l r
+//wrap:expr Xnor Z3_mk_bvxnor l r
 
-// BVNeg returns the two's complement negation of l.
+// Neg returns the two's complement negation of l.
 //
-// l must have bit-vector sort.
-//
-//wrap:expr BVNeg Z3_mk_bvneg l
+//wrap:expr Neg Z3_mk_bvneg l
 
-// BVAdd returns the two's complement sum of l and r.
+// Add returns the two's complement sum of l and r.
 //
-// l and r must have the same bit-vector sort.
+// l and r must have the same size.
 //
-//wrap:expr BVAdd Z3_mk_bvadd l r
+//wrap:expr Add Z3_mk_bvadd l r
 
-// BVSub returns the two's complement subtraction l minus r.
+// Sub returns the two's complement subtraction l minus r.
 //
-// l and r must have the same bit-vector sort.
+// l and r must have the same size.
 //
-//wrap:expr BVSub Z3_mk_bvsub l r
+//wrap:expr Sub Z3_mk_bvsub l r
 
-// BVMul returns the two's complement product of l and r.
+// Mul returns the two's complement product of l and r.
 //
-// l and r must have the same bit-vector sort.
+// l and r must have the same size.
 //
-//wrap:expr BVMul Z3_mk_bvmul l r
+//wrap:expr Mul Z3_mk_bvmul l r
 
-// BVUDiv returns the unsigned division of l over r.
+// UDiv returns the unsigned quotient of l divided by r.
 //
-// l and r must have the same bit-vector sort.
+// l and r must have the same size.
 //
-//wrap:expr BVUDiv Z3_mk_bvudiv l r
+//wrap:expr UDiv Z3_mk_bvudiv l r
 
-// BVSDiv returns the two's complement signed division of l over r.
+// SDiv returns the two's complement signed quotient of l divided by r.
 //
-// l and r must have the same bit-vector sort.
+// l and r must have the same size.
 //
-//wrap:expr BVSDiv Z3_mk_bvsdiv l r
+//wrap:expr SDiv Z3_mk_bvsdiv l r
 
-// BVURem returns the unsigned remainder of l divided by r.
+// URem returns the unsigned remainder of l divided by r.
 //
-// l and r must have the same bit-vector sort.
+// l and r must have the same size.
 //
-//wrap:expr BVURem Z3_mk_bvurem l r
+//wrap:expr URem Z3_mk_bvurem l r
 
-// BVSRem returns the two's complement signed remainder of l divided by r.
+// SRem returns the two's complement signed remainder of l divided by r.
 //
 // The sign of the result follows the sign of l.
 //
-// l and r must have the same bit-vector sort.
+// l and r must have the same size.
 //
-//wrap:expr BVSRem Z3_mk_bvsrem l r
+//wrap:expr SRem Z3_mk_bvsrem l r
 
-// BVSMod returns the two's complement signed modulus of l divided by r.
+// SMod returns the two's complement signed modulus of l divided by r.
 //
 // The sign of the result follows the sign of r.
 //
-// l and r must have the same bit-vector sort.
+// l and r must have the same size.
 //
-//wrap:expr BVSMod Z3_mk_bvsmod l r
+//wrap:expr SMod Z3_mk_bvsmod l r
 
-// BVULT returns the l < r, where l and r are unsigned.
+// ULT returns the l < r, where l and r are unsigned.
 //
-// l and r must have the same bit-vector sort.
+// l and r must have the same size.
 //
-//wrap:expr BVULT Z3_mk_bvult l r
+//wrap:expr ULT:Bool Z3_mk_bvult l r
 
-// BVSLT returns the l < r, where l and r are signed.
+// SLT returns the l < r, where l and r are signed.
 //
-// l and r must have the same bit-vector sort.
+// l and r must have the same size.
 //
-//wrap:expr BVSLT Z3_mk_bvslt l r
+//wrap:expr SLT:Bool Z3_mk_bvslt l r
 
-// BVULE returns the l <= r, where l and r are unsigned.
+// ULE returns the l <= r, where l and r are unsigned.
 //
-// l and r must have the same bit-vector sort.
+// l and r must have the same size.
 //
-//wrap:expr BVULE Z3_mk_bvule l r
+//wrap:expr ULE:Bool Z3_mk_bvule l r
 
-// BVSLE returns the l <= r, where l and r are signed.
+// SLE returns the l <= r, where l and r are signed.
 //
-// l and r must have the same bit-vector sort.
+// l and r must have the same size.
 //
-//wrap:expr BVSLE Z3_mk_bvsle l r
+//wrap:expr SLE:Bool Z3_mk_bvsle l r
 
-// BVUGE returns the l >= r, where l and r are unsigned.
+// UGE returns the l >= r, where l and r are unsigned.
 //
-// l and r must have the same bit-vector sort.
+// l and r must have the same size.
 //
-//wrap:expr BVUGE Z3_mk_bvuge l r
+//wrap:expr UGE:Bool Z3_mk_bvuge l r
 
-// BVSGE returns the l >= r, where l and r are signed.
+// SGE returns the l >= r, where l and r are signed.
 //
-// l and r must have the same bit-vector sort.
+// l and r must have the same size.
 //
-//wrap:expr BVSGE Z3_mk_bvsge l r
+//wrap:expr SGE:Bool Z3_mk_bvsge l r
 
-// BVUGT returns the l > r, where l and r are unsigned.
+// UGT returns the l > r, where l and r are unsigned.
 //
-// l and r must have the same bit-vector sort.
+// l and r must have the same size.
 //
-//wrap:expr BVUGT Z3_mk_bvugt l r
+//wrap:expr UGT:Bool Z3_mk_bvugt l r
 
-// BVSGT returns the l > r, where l and r are signed.
+// SGT returns the l > r, where l and r are signed.
 //
-// l and r must have the same bit-vector sort.
+// l and r must have the same size.
 //
-//wrap:expr BVSGT Z3_mk_bvsgt l r
+//wrap:expr SGT:Bool Z3_mk_bvsgt l r
 
-// BVConcat returns concatenation of l and r.
+// Concat returns concatenation of l and r.
 //
-// l and r must have bit-vector sort. The result is a bit-vector whose
-// length is the sum of the lengths of l and r.
+// The result is a bit-vector whose length is the sum of the lengths
+// of l and r.
 //
-//wrap:expr BVConcat Z3_mk_concat l r
+//wrap:expr Concat Z3_mk_concat l r
 
-// BVExtract returns bits [high, low] (inclusive) of l, where bit 0 is
+// Extract returns bits [high, low] (inclusive) of l, where bit 0 is
 // the least significant bit.
 //
-// l must have bit-vector sort.
-//
-//wrap:expr BVExtract l high:int low:int : Z3_mk_extract high:unsigned low:unsigned l
+//wrap:expr Extract l high:int low:int : Z3_mk_extract high:unsigned low:unsigned l
 
-// BVSignExtend returns l sign-extended to a bit-vector of length m+i,
+// SignExtend returns l sign-extended to a bit-vector of length m+i,
 // where m is the length of l.
 //
-// l must have bit-vector sort.
-//
-//wrap:expr BVSignExtend l i:int : Z3_mk_sign_ext i:unsigned l
+//wrap:expr SignExtend l i:int : Z3_mk_sign_ext i:unsigned l
 
-// BVZeroExtend returns l zero-extended to a bit-vector of length m+i,
+// ZeroExtend returns l zero-extended to a bit-vector of length m+i,
 // where m is the length of l.
 //
-// l must have bit-vector sort.
-//
-//wrap:expr BVZeroExtend l i:int : Z3_mk_zero_ext i:unsigned l
+//wrap:expr ZeroExtend l i:int : Z3_mk_zero_ext i:unsigned l
 
-// BVRepeat returns l repeated up to length i.
+// Repeat returns l repeated up to length i.
 //
-// l must have bit-vector sort.
-//
-//wrap:expr BVRepeat l i:int : Z3_mk_repeat i:unsigned l
+//wrap:expr Repeat l i:int : Z3_mk_repeat i:unsigned l
 
-// BVShiftLeft returns l shifted left by i bits.
+// Lsh returns l shifted left by i bits.
 //
 // This is equivalent to l * 2^i.
 //
-// l and i must have the same bit-vector sort. The result has the same
-// sort.
+// l and i must have the same size. The result has the same sort.
 //
-//wrap:expr BVShiftLeft Z3_mk_bvshl l i
+//wrap:expr Lsh Z3_mk_bvshl l i
 
-// BVShiftRightLogical returns l logically shifted right by i bits.
+// URsh returns l logically shifted right by i bits.
 //
 // This is equivalent to l / 2^i, where l and i are unsigned.
 //
-// l and i must have the same bit-vector sort. The result has the same
-// sort.
+// l and i must have the same size. The result has the same sort.
 //
-//wrap:expr BVShiftRightLogical Z3_mk_bvlshr l i
+//wrap:expr URsh Z3_mk_bvlshr l i
 
-// BVShiftRightArithmetic returns l arithmetically shifted right by i bits.
+// SRsh returns l arithmetically shifted right by i bits.
 //
-// This is like BVShiftRightLogical, but the sign of the result is the
-// sign of l.
+// This is like URsh, but the sign of the result is the sign of l.
 //
-// l and i must have the same bit-vector sort. The result has the same
-// sort.
+// l and i must have the same size. The result has the same sort.
 //
-//wrap:expr BVShiftRightArithmetic Z3_mk_bvashr l i
+//wrap:expr SRsh Z3_mk_bvashr l i
 
-// BVRotateLeft returns l rotated left by i bits.
+// RotateLeft returns l rotated left by i bits.
 //
-// l and i must have the same bit-vector sort.
+// l and i must have the same size.
 //
-//wrap:expr BVRotateLeft Z3_mk_ext_rotate_left l i
+//wrap:expr RotateLeft Z3_mk_ext_rotate_left l i
 
-// BVRotateRight returns l rotated right by i bits.
+// RotateRight returns l rotated right by i bits.
 //
-// l and i must have the same bit-vector sort.
+// l and i must have the same size.
 //
-//wrap:expr BVRotateRight Z3_mk_ext_rotate_right l i
+//wrap:expr RotateRight Z3_mk_ext_rotate_right l i
 
-// Int2BV converts integer l to a bit-vector of width bits.
-//
-// l must have integer sort.
-//
-//wrap:expr Int2BV l bits:int : Z3_mk_int2bv bits:unsigned l
+// TODO: This belongs on the Int type.
 
-// BVS2Int converts signed bit-vector l to an integer.
+// ToBV converts l to a bit-vector of width bits.
 //
-// l must have bit-vector sort.
-//
-//wrap:expr BVS2Int l : Z3_mk_bv2int l 1:Z3_bool
+//XXXwrap:expr ToBV:BV l:Int bits:int : Z3_mk_int2bv bits:unsigned l
 
-// BVU2Int converts unsigned bit-vector l to an integer.
+// TODO: These require an Int type.
+
+// SToInt converts signed bit-vector l to an integer.
 //
-// l must have bit-vector sort.
+//XXXwrap:expr SToInt:Int l : Z3_mk_bv2int l 1:Z3_bool
+
+// UToInt converts unsigned bit-vector l to an integer.
 //
-//wrap:expr BVU2Int l : Z3_mk_bv2int l 0:Z3_bool
+//XXXwrap:expr UToInt:Int l : Z3_mk_bv2int l 0:Z3_bool
 
 // TODO: Z3_mk_bv*_no_{over,under}flow

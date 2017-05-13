@@ -16,6 +16,8 @@ import (
 	"strings"
 )
 
+var flagType = flag.String("t", "", "default arguments and results to `type`")
+
 func main() {
 	flag.Parse()
 	for _, filename := range flag.Args() {
@@ -51,6 +53,9 @@ import "C"
 
 `)
 
+		// Emit common methods.
+		genCommon(&out)
+
 		// Process lines.
 		doc := [][]byte{}
 		for i, line := range lines {
@@ -77,18 +82,39 @@ import "C"
 	}
 }
 
+func genCommon(w *bytes.Buffer) {
+	fmt.Fprintln(w, "// Eq returns an expression that is true if l and r are equal.")
+	dir := parseDirective(strings.Fields("//wrap:expr Eq:Bool Z3_mk_eq l r"))
+	genMethod(w, dir, "")
+
+	fmt.Fprintf(w, `// NE returns an expression that is true if l and r are not equal.
+func (l %s) NE(r %s) Bool {
+	return l.ctx.Distinct(l, r)
+}
+
+`, *flagType, *flagType)
+}
+
 type directive struct {
 	goFn, cFn     string
-	goArgs, cArgs []arg
+	goArgs, cArgs []*arg
 	isDDD         bool
+	resType       string
 }
 
 type arg struct {
-	name, typ string
+	name, goTyp, cExpr string
+}
+
+func split(x, def string) (a, b string) {
+	if i := strings.Index(x, ":"); i >= 0 {
+		return x[:i], x[i+1:]
+	}
+	return x, def
 }
 
 func parseDirective(parts []string) *directive {
-	defType := "*Expr"
+	defType := *flagType
 
 	colon, cPos := -1, 2
 	for i, p := range parts {
@@ -98,8 +124,10 @@ func parseDirective(parts []string) *directive {
 		}
 	}
 
+	goFn, resType := split(parts[1], defType)
 	dir := &directive{
-		goFn: parts[1], cFn: parts[cPos],
+		goFn: goFn, cFn: parts[cPos],
+		resType: resType,
 	}
 
 	cArgs := parts[cPos+1:]
@@ -108,26 +136,30 @@ func parseDirective(parts []string) *directive {
 		goArgs = parts[2:colon]
 	}
 
-	if strings.HasSuffix(goArgs[len(goArgs)-1], "...") {
+	argMap := make(map[string]*arg)
+	for _, goArg := range goArgs {
+		name, goTyp := split(goArg, defType)
+		argMap[name] = &arg{name, goTyp, ""}
+		dir.goArgs = append(dir.goArgs, argMap[name])
+	}
+	for _, cArg := range cArgs {
+		name, cTyp := split(cArg, "")
+		arg := argMap[name]
+		if cTyp == "" && arg.goTyp == "Expr" {
+			arg.cExpr = "%s.impl().c" // Expr interface
+		} else if cTyp == "" {
+			arg.cExpr = "%s.c" // expr wrapper
+		} else {
+			arg.cExpr = "C." + cTyp + "(%s)" // basic type
+		}
+		dir.cArgs = append(dir.cArgs, arg)
+	}
+
+	if strings.HasSuffix(dir.goArgs[len(dir.goArgs)-1].name, "...") {
 		dir.isDDD = true
 	}
 
-	dir.goArgs = parseArgs(goArgs, defType)
-	dir.cArgs = parseArgs(cArgs, "")
-
 	return dir
-}
-
-func parseArgs(args []string, defType string) []arg {
-	out := make([]arg, 0, len(args))
-	for _, a := range args {
-		if i := strings.Index(a, ":"); i >= 0 {
-			out = append(out, arg{a[:i], a[i+1:]})
-		} else {
-			out = append(out, arg{a, defType})
-		}
-	}
-	return out
 }
 
 func process(w *bytes.Buffer, line []byte, doc [][]byte, label string) {
@@ -150,31 +182,38 @@ func process(w *bytes.Buffer, line []byte, doc [][]byte, label string) {
 		fmt.Fprintf(w, "%s\n", line)
 	}
 
+	genMethod(w, dir, label)
+}
+
+func genMethod(w *bytes.Buffer, dir *directive, label string) {
 	// Function declaration.
-	fmt.Fprintf(w, "func (%s %s) %s(", dir.goArgs[0].name, dir.goArgs[0].typ, dir.goFn)
+	fmt.Fprintf(w, "func (%s %s) %s(", dir.goArgs[0].name, dir.goArgs[0].goTyp, dir.goFn)
 	for i, a := range dir.goArgs[1:] {
 		if i > 0 {
 			fmt.Fprintf(w, ", ")
 		}
-		fmt.Fprintf(w, "%s %s", a.name, a.typ)
+		fmt.Fprintf(w, "%s %s", a.name, a.goTyp)
 	}
-	fmt.Fprintf(w, ") *Expr {\n")
-	fmt.Fprintf(w, " // Generated from %s.\n", label)
+	fmt.Fprintf(w, ") %s {\n", dir.resType)
+	if label != "" {
+		fmt.Fprintf(w, " // Generated from %s.\n", label)
+	}
 
-	if dir.goArgs[0].typ != "*Context" {
+	if dir.goArgs[0].goTyp != "*Context" {
 		// Context is implied by the receiver.
 		fmt.Fprintf(w, " ctx := %s.ctx\n", dir.goArgs[0].name)
 	}
 
 	if dir.isDDD {
 		// Convert arguments to C array.
-		ddd := dir.cArgs[len(dir.cArgs)-1].name
+		arg := dir.cArgs[len(dir.cArgs)-1]
+		ddd := arg.name
 		ddd = ddd[:len(ddd)-3]
 		fmt.Fprintf(w, " cargs := make([]C.Z3_ast, len(%s)+%d)\n", ddd, len(dir.cArgs)-1)
 		for i, arg := range dir.cArgs[:len(dir.cArgs)-1] {
-			fmt.Fprintf(w, " cargs[%d] = %s.c\n", i, arg.name)
+			fmt.Fprintf(w, " cargs[%d] = "+arg.cExpr+"\n", i, arg.name)
 		}
-		fmt.Fprintf(w, " for i, arg := range %s { cargs[i+%d] = arg.c }\n", ddd, len(dir.cArgs)-1)
+		fmt.Fprintf(w, " for i, arg := range %s { cargs[i+%d] = "+arg.cExpr+" }\n", ddd, len(dir.cArgs)-1, "arg")
 	}
 
 	// Construct the AST.
@@ -183,11 +222,7 @@ func process(w *bytes.Buffer, line []byte, doc [][]byte, label string) {
 	fmt.Fprintf(w, "  cexpr = C.%s(ctx.c", dir.cFn)
 	if !dir.isDDD {
 		for _, a := range dir.cArgs {
-			if a.typ == "" {
-				fmt.Fprintf(w, ", %s.c", a.name)
-			} else {
-				fmt.Fprintf(w, ", C.%s(%s)", a.typ, a.name)
-			}
+			fmt.Fprintf(w, ", "+a.cExpr, a.name)
 		}
 	} else {
 		fmt.Fprintf(w, ", C.uint(len(cargs)), &cargs[0]")
@@ -198,7 +233,7 @@ func process(w *bytes.Buffer, line []byte, doc [][]byte, label string) {
 	// Keep arguments alive.
 	if !dir.isDDD {
 		for _, a := range dir.goArgs {
-			if a.typ[0] == '*' && a.name != "ctx" {
+			if a.goTyp != "int" && a.name != "ctx" {
 				fmt.Fprintf(w, " runtime.KeepAlive(%s)\n", a.name)
 			}
 		}
@@ -207,7 +242,13 @@ func process(w *bytes.Buffer, line []byte, doc [][]byte, label string) {
 	}
 
 	// Wrap the final C result in a Go result.
-	fmt.Fprintf(w, " return wrapExpr(ctx, cexpr)\n")
+	expr := "wrapExpr(ctx, cexpr)"
+	if dir.resType == "Expr" {
+		// Determine the concrete type dynamically.
+		fmt.Fprintf(w, " return %s.lift(SortUnknown)", expr)
+	} else {
+		fmt.Fprintf(w, " return %s(%s)\n", dir.resType, expr)
+	}
 	fmt.Fprintf(w, "}\n")
 	fmt.Fprintf(w, "\n")
 }
