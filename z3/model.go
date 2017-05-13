@@ -14,23 +14,26 @@ import "runtime"
 import "C"
 
 type Model struct {
-	ctx *Context
-	c   C.Z3_model
+	*modelImpl
 	noEq
 }
 
+type modelImpl struct {
+	ctx *Context
+	c   C.Z3_model
+}
+
 func wrapModel(ctx *Context, c C.Z3_model) *Model {
-	model := &Model{ctx, c, noEq{}}
+	impl := &modelImpl{ctx, c}
 	ctx.lock.Lock()
 	C.Z3_model_inc_ref(ctx.c, c)
 	ctx.lock.Unlock()
-	// TODO: Don't attach finalizer to a user-visible pointer.
-	runtime.SetFinalizer(model, func(model *Model) {
-		model.ctx.do(func() {
-			C.Z3_model_dec_ref(model.ctx.c, model.c)
+	runtime.SetFinalizer(impl, func(impl *modelImpl) {
+		impl.ctx.do(func() {
+			C.Z3_model_dec_ref(impl.ctx.c, impl.c)
 		})
 	})
-	return model
+	return &Model{impl, noEq{}}
 }
 
 // Eval evaluates expr using the values in model m.
