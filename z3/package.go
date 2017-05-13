@@ -11,8 +11,8 @@
 // good introduction to the concepts of SMT and Z3, see the Z3 guide
 // (http://rise4fun.com/z3/tutorialcontent/guide).
 //
-// Currently this package only supports formulas of booleans and
-// bit-vectors, though more types are easy to add.
+// Currently this package only supports formulas of booleans,
+// bit-vectors, ints, and reals though more types are easy to add.
 //
 // The main entry point to the z3 package is type Context. All
 // expressions are created and all solving is done relative to some

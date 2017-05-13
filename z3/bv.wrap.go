@@ -30,7 +30,7 @@ func (l BV) NE(r BV) Bool {
 
 // Not returns the bit-wise negation of l.
 func (l BV) Not() BV {
-	// Generated from bv.go:142.
+	// Generated from bv.go:117.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -44,7 +44,7 @@ func (l BV) Not() BV {
 //
 // l and r must have the same size.
 func (l BV) And(r BV) BV {
-	// Generated from bv.go:148.
+	// Generated from bv.go:123.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -59,7 +59,7 @@ func (l BV) And(r BV) BV {
 //
 // l and r must have the same size.
 func (l BV) Or(r BV) BV {
-	// Generated from bv.go:154.
+	// Generated from bv.go:129.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -74,7 +74,7 @@ func (l BV) Or(r BV) BV {
 //
 // l and r must have the same size.
 func (l BV) Xor(r BV) BV {
-	// Generated from bv.go:160.
+	// Generated from bv.go:135.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -89,7 +89,7 @@ func (l BV) Xor(r BV) BV {
 //
 // l and r must have the same size.
 func (l BV) Nand(r BV) BV {
-	// Generated from bv.go:166.
+	// Generated from bv.go:141.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -104,7 +104,7 @@ func (l BV) Nand(r BV) BV {
 //
 // l and r must have the same size.
 func (l BV) Nor(r BV) BV {
-	// Generated from bv.go:172.
+	// Generated from bv.go:147.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -119,7 +119,7 @@ func (l BV) Nor(r BV) BV {
 //
 // l and r must have the same size.
 func (l BV) Xnor(r BV) BV {
-	// Generated from bv.go:178.
+	// Generated from bv.go:153.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -132,7 +132,7 @@ func (l BV) Xnor(r BV) BV {
 
 // Neg returns the two's complement negation of l.
 func (l BV) Neg() BV {
-	// Generated from bv.go:182.
+	// Generated from bv.go:157.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -146,7 +146,7 @@ func (l BV) Neg() BV {
 //
 // l and r must have the same size.
 func (l BV) Add(r BV) BV {
-	// Generated from bv.go:188.
+	// Generated from bv.go:163.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -161,7 +161,7 @@ func (l BV) Add(r BV) BV {
 //
 // l and r must have the same size.
 func (l BV) Sub(r BV) BV {
-	// Generated from bv.go:194.
+	// Generated from bv.go:169.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -176,7 +176,7 @@ func (l BV) Sub(r BV) BV {
 //
 // l and r must have the same size.
 func (l BV) Mul(r BV) BV {
-	// Generated from bv.go:200.
+	// Generated from bv.go:175.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -191,7 +191,7 @@ func (l BV) Mul(r BV) BV {
 //
 // l and r must have the same size.
 func (l BV) UDiv(r BV) BV {
-	// Generated from bv.go:206.
+	// Generated from bv.go:181.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -206,7 +206,7 @@ func (l BV) UDiv(r BV) BV {
 //
 // l and r must have the same size.
 func (l BV) SDiv(r BV) BV {
-	// Generated from bv.go:212.
+	// Generated from bv.go:187.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -221,7 +221,7 @@ func (l BV) SDiv(r BV) BV {
 //
 // l and r must have the same size.
 func (l BV) URem(r BV) BV {
-	// Generated from bv.go:218.
+	// Generated from bv.go:193.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -238,7 +238,7 @@ func (l BV) URem(r BV) BV {
 //
 // l and r must have the same size.
 func (l BV) SRem(r BV) BV {
-	// Generated from bv.go:226.
+	// Generated from bv.go:201.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -255,7 +255,7 @@ func (l BV) SRem(r BV) BV {
 //
 // l and r must have the same size.
 func (l BV) SMod(r BV) BV {
-	// Generated from bv.go:234.
+	// Generated from bv.go:209.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -270,7 +270,7 @@ func (l BV) SMod(r BV) BV {
 //
 // l and r must have the same size.
 func (l BV) ULT(r BV) Bool {
-	// Generated from bv.go:240.
+	// Generated from bv.go:215.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -285,7 +285,7 @@ func (l BV) ULT(r BV) Bool {
 //
 // l and r must have the same size.
 func (l BV) SLT(r BV) Bool {
-	// Generated from bv.go:246.
+	// Generated from bv.go:221.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -300,7 +300,7 @@ func (l BV) SLT(r BV) Bool {
 //
 // l and r must have the same size.
 func (l BV) ULE(r BV) Bool {
-	// Generated from bv.go:252.
+	// Generated from bv.go:227.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -315,7 +315,7 @@ func (l BV) ULE(r BV) Bool {
 //
 // l and r must have the same size.
 func (l BV) SLE(r BV) Bool {
-	// Generated from bv.go:258.
+	// Generated from bv.go:233.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -330,7 +330,7 @@ func (l BV) SLE(r BV) Bool {
 //
 // l and r must have the same size.
 func (l BV) UGE(r BV) Bool {
-	// Generated from bv.go:264.
+	// Generated from bv.go:239.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -345,7 +345,7 @@ func (l BV) UGE(r BV) Bool {
 //
 // l and r must have the same size.
 func (l BV) SGE(r BV) Bool {
-	// Generated from bv.go:270.
+	// Generated from bv.go:245.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -360,7 +360,7 @@ func (l BV) SGE(r BV) Bool {
 //
 // l and r must have the same size.
 func (l BV) UGT(r BV) Bool {
-	// Generated from bv.go:276.
+	// Generated from bv.go:251.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -375,7 +375,7 @@ func (l BV) UGT(r BV) Bool {
 //
 // l and r must have the same size.
 func (l BV) SGT(r BV) Bool {
-	// Generated from bv.go:282.
+	// Generated from bv.go:257.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -391,7 +391,7 @@ func (l BV) SGT(r BV) Bool {
 // The result is a bit-vector whose length is the sum of the lengths
 // of l and r.
 func (l BV) Concat(r BV) BV {
-	// Generated from bv.go:289.
+	// Generated from bv.go:264.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -405,7 +405,7 @@ func (l BV) Concat(r BV) BV {
 // Extract returns bits [high, low] (inclusive) of l, where bit 0 is
 // the least significant bit.
 func (l BV) Extract(high int, low int) BV {
-	// Generated from bv.go:294.
+	// Generated from bv.go:269.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -418,7 +418,7 @@ func (l BV) Extract(high int, low int) BV {
 // SignExtend returns l sign-extended to a bit-vector of length m+i,
 // where m is the length of l.
 func (l BV) SignExtend(i int) BV {
-	// Generated from bv.go:299.
+	// Generated from bv.go:274.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -431,7 +431,7 @@ func (l BV) SignExtend(i int) BV {
 // ZeroExtend returns l zero-extended to a bit-vector of length m+i,
 // where m is the length of l.
 func (l BV) ZeroExtend(i int) BV {
-	// Generated from bv.go:304.
+	// Generated from bv.go:279.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -443,7 +443,7 @@ func (l BV) ZeroExtend(i int) BV {
 
 // Repeat returns l repeated up to length i.
 func (l BV) Repeat(i int) BV {
-	// Generated from bv.go:308.
+	// Generated from bv.go:283.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -459,7 +459,7 @@ func (l BV) Repeat(i int) BV {
 //
 // l and i must have the same size. The result has the same sort.
 func (l BV) Lsh(i BV) BV {
-	// Generated from bv.go:316.
+	// Generated from bv.go:291.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -476,7 +476,7 @@ func (l BV) Lsh(i BV) BV {
 //
 // l and i must have the same size. The result has the same sort.
 func (l BV) URsh(i BV) BV {
-	// Generated from bv.go:324.
+	// Generated from bv.go:299.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -493,7 +493,7 @@ func (l BV) URsh(i BV) BV {
 //
 // l and i must have the same size. The result has the same sort.
 func (l BV) SRsh(i BV) BV {
-	// Generated from bv.go:332.
+	// Generated from bv.go:307.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -508,7 +508,7 @@ func (l BV) SRsh(i BV) BV {
 //
 // l and i must have the same size.
 func (l BV) RotateLeft(i BV) BV {
-	// Generated from bv.go:338.
+	// Generated from bv.go:313.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -523,7 +523,7 @@ func (l BV) RotateLeft(i BV) BV {
 //
 // l and i must have the same size.
 func (l BV) RotateRight(i BV) BV {
-	// Generated from bv.go:344.
+	// Generated from bv.go:319.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -532,4 +532,28 @@ func (l BV) RotateRight(i BV) BV {
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(i)
 	return BV(wrapExpr(ctx, cexpr))
+}
+
+// SToInt converts signed bit-vector l to an integer.
+func (l BV) SToInt() Int {
+	// Generated from bv.go:323.
+	ctx := l.ctx
+	var cexpr C.Z3_ast
+	ctx.do(func() {
+		cexpr = C.Z3_mk_bv2int(ctx.c, l.c, C.Z3_TRUE)
+	})
+	runtime.KeepAlive(l)
+	return Int(wrapExpr(ctx, cexpr))
+}
+
+// UToInt converts unsigned bit-vector l to an integer.
+func (l BV) UToInt() Int {
+	// Generated from bv.go:327.
+	ctx := l.ctx
+	var cexpr C.Z3_ast
+	ctx.do(func() {
+		cexpr = C.Z3_mk_bv2int(ctx.c, l.c, C.Z3_FALSE)
+	})
+	runtime.KeepAlive(l)
+	return Int(wrapExpr(ctx, cexpr))
 }

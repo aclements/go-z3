@@ -133,8 +133,8 @@ func (ctx *Context) FreshConst(prefix string, sort *Sort) Expr {
 	return wrapExpr(ctx, cexpr).lift(sort.Kind())
 }
 
-// FromBigInt returns a constant expression whose value is val. sort
-// must have kind int, real, finite-domain, or bit-vector.
+// FromBigInt returns a literal whose value is val. sort must have
+// kind int, real, finite-domain, or bit-vector.
 func (ctx *Context) FromBigInt(val *big.Int, sort *Sort) Expr {
 	cstr := C.CString(val.Text(10))
 	defer C.free(unsafe.Pointer(cstr))
@@ -146,11 +146,13 @@ func (ctx *Context) FromBigInt(val *big.Int, sort *Sort) Expr {
 	return wrapExpr(ctx, cexpr).lift(sort.Kind())
 }
 
-// FromInt returns a constant expression whose value is val. sort must
-// have kind int, finite-domain, or bit-vector.
+// FromInt returns a literal whose value is val. sort must have kind
+// int, real, finite-domain, or bit-vector.
 func (ctx *Context) FromInt(val int64, sort *Sort) Expr {
 	var cexpr C.Z3_ast
 	ctx.do(func() {
+		// Z3_mk_int64 doesn't say real sorts are accepted,
+		// but the C++ bindings use it for reals.
 		cexpr = C.Z3_mk_int64(ctx.c, C.__int64(val), sort.c)
 	})
 	runtime.KeepAlive(sort)
@@ -200,4 +202,57 @@ func (expr *exprImpl) astKind() C.Z3_ast_kind {
 	})
 	runtime.KeepAlive(expr)
 	return ckind
+}
+
+func (expr *exprImpl) asBigInt() (val *big.Int, isLiteral bool) {
+	switch expr.Sort().Kind() {
+	default:
+		panic("sort " + expr.Sort().String() + " cannot be represented as a big.Int")
+	case SortInt, SortBV:
+	}
+	if expr.astKind() != C.Z3_NUMERAL_AST {
+		return nil, false
+	}
+	var str string
+	expr.ctx.do(func() {
+		cstr := C.Z3_get_numeral_string(expr.ctx.c, expr.c)
+		str = C.GoString(cstr)
+	})
+	var v big.Int
+	if _, ok := v.SetString(str, 10); !ok {
+		panic("failed to parse numeral string")
+	}
+	return &v, true
+}
+
+func (expr *exprImpl) asInt64() (val int64, isLiteral, ok bool) {
+	switch expr.Sort().Kind() {
+	default:
+		panic("sort " + expr.Sort().String() + " cannot be represented as an int64")
+	case SortInt, SortBV:
+	}
+	if expr.astKind() != C.Z3_NUMERAL_AST {
+		return 0, false, false
+	}
+	var cval C.__int64
+	expr.ctx.do(func() {
+		ok = z3ToBool(C.Z3_get_numeral_int64(expr.ctx.c, expr.c, &cval))
+	})
+	return int64(cval), true, ok
+}
+
+func (expr *exprImpl) asUint64() (val uint64, isLiteral, ok bool) {
+	switch expr.Sort().Kind() {
+	default:
+		panic("sort " + expr.Sort().String() + " cannot be represented as an int64")
+	case SortInt, SortBV:
+	}
+	if expr.astKind() != C.Z3_NUMERAL_AST {
+		return 0, false, false
+	}
+	var cval C.__uint64
+	expr.ctx.do(func() {
+		ok = z3ToBool(C.Z3_get_numeral_uint64(expr.ctx.c, expr.c, &cval))
+	})
+	return uint64(cval), true, ok
 }

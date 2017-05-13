@@ -48,11 +48,11 @@ func (ctx *Context) BVConst(name string, bits int) BV {
 
 // AsBigSigned returns the value of expr as a math/big.Int,
 // interpreting expr as a signed two's complement number. If expr is
-// not constant, it returns nil, false.
-func (expr BV) AsBigSigned() (val *big.Int, isConst bool) {
-	v, isConst := expr.AsBigUnsigned()
+// not a literal, it returns nil, false.
+func (expr BV) AsBigSigned() (val *big.Int, isLiteral bool) {
+	v, isLiteral := expr.AsBigUnsigned()
 	if v == nil {
-		return v, isConst
+		return v, isLiteral
 	}
 	size := expr.Sort().BVSize()
 	if v.Bit(size-1) != 0 {
@@ -64,38 +64,23 @@ func (expr BV) AsBigSigned() (val *big.Int, isConst bool) {
 }
 
 // AsBigUnsigned is like AsBigSigned, but interprets expr as unsigned.
-func (expr BV) AsBigUnsigned() (val *big.Int, isConst bool) {
-	if expr.Sort().Kind() != SortBV {
-		panic("not a bit-vector")
-	}
-	if expr.astKind() != C.Z3_NUMERAL_AST {
-		return nil, false
-	}
-	var str string
-	expr.ctx.do(func() {
-		cstr := C.Z3_get_numeral_string(expr.ctx.c, expr.c)
-		str = C.GoString(cstr)
-	})
-	var v big.Int
-	if _, ok := v.SetString(str, 10); !ok {
-		panic("failed to parse numeral string")
-	}
-	return &v, true
+func (expr BV) AsBigUnsigned() (val *big.Int, isLiteral bool) {
+	return expr.asBigInt()
 }
 
-// AsInt64 returns the value of expr as an int64, interpreting expr as a
-// two's complement signed number. If expr is not constant, it returns
-// 0, false, false. If expr is constant, but its value cannot be
-// represented as an int64, it returns 0, true, false.
-func (expr BV) AsInt64() (val int64, isConst, ok bool) {
-	// Oddly, Z3_get_numeral_int64 interprets the number as
-	// unsigned, which makes no sense since the API is strictly
-	// less useful than Z3_get_numeral_uint64 and doesn't mirror
+// AsInt64 returns the value of expr as an int64, interpreting expr as
+// a two's complement signed number. If expr is not a literal, it
+// returns 0, false, false. If expr is a literal, but its value cannot
+// be represented as an int64, it returns 0, true, false.
+func (expr BV) AsInt64() (val int64, isLiteral, ok bool) {
+	// Z3_get_numeral_int64 (expr.asInt64) interprets the number
+	// as unsigned because it's general-purpose. However, since
+	// this method is specific to BV, we make this instead mirror
 	// Z3_mk_int64. So, use Z3_get_numeral_uint64 and sign extend
 	// it ourselves.
-	uval, isConst, ok := expr.AsUint64()
-	if !isConst {
-		return 0, isConst, ok
+	uval, isLiteral, ok := expr.asUint64()
+	if !isLiteral {
+		return 0, isLiteral, ok
 	}
 	size := expr.Sort().BVSize()
 	if ok && size < 64 {
@@ -121,18 +106,8 @@ func (expr BV) AsInt64() (val int64, isConst, ok bool) {
 
 // AsUint64 is like AsInt64, but interprets expr as unsigned and fails
 // if expr cannot be represented as a uint64.
-func (expr BV) AsUint64() (val uint64, isConst, ok bool) {
-	if expr.Sort().Kind() != SortBV {
-		panic("not a bit-vector")
-	}
-	if expr.astKind() != C.Z3_NUMERAL_AST {
-		return 0, false, false
-	}
-	var cval C.__uint64
-	expr.ctx.do(func() {
-		ok = z3ToBool(C.Z3_get_numeral_uint64(expr.ctx.c, expr.c, &cval))
-	})
-	return uint64(cval), true, ok
+func (expr BV) AsUint64() (val uint64, isLiteral, ok bool) {
+	return expr.asUint64()
 }
 
 //go:generate go run genwrap.go -t BV $GOFILE
@@ -343,20 +318,12 @@ func (expr BV) AsUint64() (val uint64, isConst, ok bool) {
 //
 //wrap:expr RotateRight Z3_mk_ext_rotate_right l i
 
-// TODO: This belongs on the Int type.
-
-// ToBV converts l to a bit-vector of width bits.
-//
-//XXXwrap:expr ToBV:BV l:Int bits:int : Z3_mk_int2bv bits:unsigned l
-
-// TODO: These require an Int type.
-
 // SToInt converts signed bit-vector l to an integer.
 //
-//XXXwrap:expr SToInt:Int l : Z3_mk_bv2int l 1:Z3_bool
+//wrap:expr SToInt:Int l : Z3_mk_bv2int l "C.Z3_TRUE"
 
 // UToInt converts unsigned bit-vector l to an integer.
 //
-//XXXwrap:expr UToInt:Int l : Z3_mk_bv2int l 0:Z3_bool
+//wrap:expr UToInt:Int l : Z3_mk_bv2int l "C.Z3_FALSE"
 
 // TODO: Z3_mk_bv*_no_{over,under}flow

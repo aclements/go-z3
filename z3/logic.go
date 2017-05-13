@@ -50,9 +50,9 @@ func (ctx *Context) BoolConst(name string) Bool {
 	return ctx.Const(name, ctx.BoolSort()).(Bool)
 }
 
-// AsBool returns the value of l as a Go bool. If l is not constant,
+// AsBool returns the value of l as a Go bool. If l is not a literal,
 // AsBool returns false, false.
-func (l Bool) AsBool() (val bool, isConst bool) {
+func (l Bool) AsBool() (val bool, isLiteral bool) {
 	var res C.Z3_lbool
 	l.ctx.do(func() {
 		res = C.Z3_get_bool_value(l.ctx.c, l.c)
