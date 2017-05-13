@@ -40,7 +40,7 @@ type Expr interface {
 	Equal(o Expr) bool
 
 	// Sort returns this expression's sort.
-	Sort() *Sort
+	Sort() Sort
 
 	// String returns this expression represented as a
 	// s-expression string.
@@ -110,7 +110,7 @@ func (x expr) lift(kind SortKind) Expr {
 // Const returns a constant named "name" of the given sort. This
 // constant will be same as all other constants created with this
 // name.
-func (ctx *Context) Const(name string, sort *Sort) Expr {
+func (ctx *Context) Const(name string, sort Sort) Expr {
 	sym := ctx.symbol(name)
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -122,7 +122,7 @@ func (ctx *Context) Const(name string, sort *Sort) Expr {
 
 // FreshConst returns a constant that is distinct from all other
 // constants. The name will begin with "prefix".
-func (ctx *Context) FreshConst(prefix string, sort *Sort) Expr {
+func (ctx *Context) FreshConst(prefix string, sort Sort) Expr {
 	cprefix := C.CString(prefix)
 	defer C.free(unsafe.Pointer(cprefix))
 	var cexpr C.Z3_ast
@@ -135,7 +135,7 @@ func (ctx *Context) FreshConst(prefix string, sort *Sort) Expr {
 
 // FromBigInt returns a literal whose value is val. sort must have
 // kind int, real, finite-domain, or bit-vector.
-func (ctx *Context) FromBigInt(val *big.Int, sort *Sort) Expr {
+func (ctx *Context) FromBigInt(val *big.Int, sort Sort) Expr {
 	cstr := C.CString(val.Text(10))
 	defer C.free(unsafe.Pointer(cstr))
 	var cexpr C.Z3_ast
@@ -148,7 +148,7 @@ func (ctx *Context) FromBigInt(val *big.Int, sort *Sort) Expr {
 
 // FromInt returns a literal whose value is val. sort must have kind
 // int, real, finite-domain, or bit-vector.
-func (ctx *Context) FromInt(val int64, sort *Sort) Expr {
+func (ctx *Context) FromInt(val int64, sort Sort) Expr {
 	var cexpr C.Z3_ast
 	ctx.do(func() {
 		// Z3_mk_int64 doesn't say real sorts are accepted,
@@ -186,7 +186,7 @@ func (expr *exprImpl) Equal(o Expr) bool {
 }
 
 // Sort returns expr's sort.
-func (expr *exprImpl) Sort() *Sort {
+func (expr *exprImpl) Sort() Sort {
 	var csort C.Z3_sort
 	expr.ctx.do(func() {
 		csort = C.Z3_get_sort(expr.ctx.c, expr.c)

@@ -24,7 +24,7 @@ func init() {
 }
 
 // BoolSort returns the boolean sort.
-func (ctx *Context) BoolSort() *Sort {
+func (ctx *Context) BoolSort() Sort {
 	var csort C.Z3_sort
 	ctx.do(func() {
 		csort = C.Z3_mk_bool_sort(ctx.c)

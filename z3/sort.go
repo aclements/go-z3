@@ -16,43 +16,46 @@ import (
 */
 import "C"
 
-// TODO: This should follow Expr and be safely copyable and use "Sort"
-// instead of "*Sort" in the API.
-
 // Sort represents the type of the Expr. A Sort can be a basic type
 // such as int or bool or a parameterized type such as a 30 bit wide
 // bit-vector or an array from int to bool.
 type Sort struct {
+	*sortImpl
+	noEq
+}
+
+// sortImpl wraps the underlying C.Z3_sort. This is separate from Sort
+// so a finalizer can be attached to this without exposing it to the
+// user.
+type sortImpl struct {
 	ctx  *Context
 	c    C.Z3_sort
 	kind SortKind
-	noEq
 }
 
 // sortWrappers is a map of Expr constructors for each sort kind.
 var sortWrappers = make(map[SortKind]func(x expr) Expr)
 
-func wrapSort(ctx *Context, c C.Z3_sort, kind SortKind) *Sort {
+func wrapSort(ctx *Context, c C.Z3_sort, kind SortKind) Sort {
 	if kind == SortUnknown {
 		ctx.do(func() {
 			kind = SortKind(C.Z3_get_sort_kind(ctx.c, c))
 		})
 	}
-	sort := &Sort{ctx, c, kind, noEq{}}
+	impl := &sortImpl{ctx, c, kind}
 	ctx.lock.Lock()
 	C.Z3_inc_ref(ctx.c, C.Z3_sort_to_ast(ctx.c, c))
 	ctx.lock.Unlock()
-	// TODO: Don't put finalizer on a user-accessible type.
-	runtime.SetFinalizer(sort, func(sort *Sort) {
-		sort.ctx.do(func() {
-			C.Z3_dec_ref(sort.ctx.c, C.Z3_sort_to_ast(sort.ctx.c, sort.c))
+	runtime.SetFinalizer(impl, func(impl *sortImpl) {
+		impl.ctx.do(func() {
+			C.Z3_dec_ref(impl.ctx.c, C.Z3_sort_to_ast(impl.ctx.c, impl.c))
 		})
 	})
-	return sort
+	return Sort{impl, noEq{}}
 }
 
 // String returns a string representation of sort.
-func (sort *Sort) String() string {
+func (sort Sort) String() string {
 	var res string
 	sort.ctx.do(func() {
 		res = C.GoString(C.Z3_sort_to_string(sort.ctx.c, sort.c))
@@ -111,12 +114,12 @@ func (k SortKind) String() string {
 }
 
 // Kind returns s's kind.
-func (s *Sort) Kind() SortKind {
+func (s Sort) Kind() SortKind {
 	return s.kind
 }
 
 // BVSize returns the bit size of a bit-vector sort.
-func (s *Sort) BVSize() int {
+func (s Sort) BVSize() int {
 	var size int
 	s.ctx.do(func() {
 		size = int(C.Z3_get_bv_sort_size(s.ctx.c, s.c))
@@ -126,7 +129,7 @@ func (s *Sort) BVSize() int {
 }
 
 // Equal returns true if s and o are structurally identical.
-func (s *Sort) Equal(o *Sort) bool {
+func (s Sort) Equal(o Sort) bool {
 	var out bool
 	s.ctx.do(func() {
 		out = z3ToBool(C.Z3_is_eq_sort(s.ctx.c, s.c, o.c))

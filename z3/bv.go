@@ -32,7 +32,7 @@ func init() {
 }
 
 // BVSort returns a bit-vector sort of the given width in bits.
-func (ctx *Context) BVSort(bits int) *Sort {
+func (ctx *Context) BVSort(bits int) Sort {
 	var csort C.Z3_sort
 	ctx.do(func() {
 		csort = C.Z3_mk_bv_sort(ctx.c, C.unsigned(bits))

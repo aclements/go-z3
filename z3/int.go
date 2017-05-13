@@ -26,7 +26,7 @@ func init() {
 }
 
 // IntSort returns the integer sort.
-func (ctx *Context) IntSort() *Sort {
+func (ctx *Context) IntSort() Sort {
 	var csort C.Z3_sort
 	ctx.do(func() {
 		csort = C.Z3_mk_int_sort(ctx.c)

@@ -29,7 +29,7 @@ func init() {
 }
 
 // RealSort returns the real sort.
-func (ctx *Context) RealSort() *Sort {
+func (ctx *Context) RealSort() Sort {
 	var csort C.Z3_sort
 	ctx.do(func() {
 		csort = C.Z3_mk_real_sort(ctx.c)
