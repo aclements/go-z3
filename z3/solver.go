@@ -123,3 +123,13 @@ func (s *Solver) Model() *Model {
 	runtime.KeepAlive(s)
 	return wrapModel(s.ctx, cmodel)
 }
+
+// String returns a string representation of s.
+func (s *Solver) String() string {
+	var res string
+	s.ctx.do(func() {
+		res = C.GoString(C.Z3_solver_to_string(s.ctx.c, s.c))
+	})
+	runtime.KeepAlive(s)
+	return res
+}
