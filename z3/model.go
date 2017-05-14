@@ -13,6 +13,7 @@ import "runtime"
 */
 import "C"
 
+// A Model is a binding of constants that satisfies a set of formulas.
 type Model struct {
 	*modelImpl
 	noEq
