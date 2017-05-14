@@ -50,13 +50,13 @@ func wrapSort(ctx *Context, c C.Z3_sort, kind Kind) Sort {
 	return Sort{impl, noEq{}}
 }
 
-// String returns a string representation of sort.
-func (sort Sort) String() string {
+// String returns a string representation of s.
+func (s Sort) String() string {
 	var res string
-	sort.ctx.do(func() {
-		res = C.GoString(C.Z3_sort_to_string(sort.ctx.c, sort.c))
+	s.ctx.do(func() {
+		res = C.GoString(C.Z3_sort_to_string(s.ctx.c, s.c))
 	})
-	runtime.KeepAlive(sort)
+	runtime.KeepAlive(s)
 	return res
 }
 

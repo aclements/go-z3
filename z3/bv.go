@@ -46,15 +46,15 @@ func (ctx *Context) BVConst(name string, bits int) BV {
 	return ctx.Const(name, ctx.BVSort(bits)).(BV)
 }
 
-// AsBigSigned returns the value of expr as a math/big.Int,
-// interpreting expr as a signed two's complement number. If expr is
-// not a literal, it returns nil, false.
-func (expr BV) AsBigSigned() (val *big.Int, isLiteral bool) {
-	v, isLiteral := expr.AsBigUnsigned()
+// AsBigSigned returns the value of lit as a math/big.Int,
+// interpreting lit as a signed two's complement number. If lit is not
+// a literal, it returns nil, false.
+func (lit BV) AsBigSigned() (val *big.Int, isLiteral bool) {
+	v, isLiteral := lit.AsBigUnsigned()
 	if v == nil {
 		return v, isLiteral
 	}
-	size := expr.Sort().BVSize()
+	size := lit.Sort().BVSize()
 	if v.Bit(size-1) != 0 {
 		shift := big.NewInt(1)
 		shift.Lsh(shift, uint(size))
@@ -63,26 +63,26 @@ func (expr BV) AsBigSigned() (val *big.Int, isLiteral bool) {
 	return v, true
 }
 
-// AsBigUnsigned is like AsBigSigned, but interprets expr as unsigned.
-func (expr BV) AsBigUnsigned() (val *big.Int, isLiteral bool) {
-	return expr.asBigInt()
+// AsBigUnsigned is like AsBigSigned, but interprets lit as unsigned.
+func (lit BV) AsBigUnsigned() (val *big.Int, isLiteral bool) {
+	return lit.asBigInt()
 }
 
-// AsInt64 returns the value of expr as an int64, interpreting expr as
-// a two's complement signed number. If expr is not a literal, it
-// returns 0, false, false. If expr is a literal, but its value cannot
-// be represented as an int64, it returns 0, true, false.
-func (expr BV) AsInt64() (val int64, isLiteral, ok bool) {
-	// Z3_get_numeral_int64 (expr.asInt64) interprets the number
+// AsInt64 returns the value of lit as an int64, interpreting lit as a
+// two's complement signed number. If lit is not a literal, it returns
+// 0, false, false. If lit is a literal, but its value cannot be
+// represented as an int64, it returns 0, true, false.
+func (lit BV) AsInt64() (val int64, isLiteral, ok bool) {
+	// Z3_get_numeral_int64 (lit.asInt64) interprets the number
 	// as unsigned because it's general-purpose. However, since
 	// this method is specific to BV, we make this instead mirror
 	// Z3_mk_int64. So, use Z3_get_numeral_uint64 and sign extend
 	// it ourselves.
-	uval, isLiteral, ok := expr.asUint64()
+	uval, isLiteral, ok := lit.asUint64()
 	if !isLiteral {
 		return 0, isLiteral, ok
 	}
-	size := expr.Sort().BVSize()
+	size := lit.Sort().BVSize()
 	if ok && size < 64 {
 		// Fits in an int64 regardless of sign. Sign-extend it.
 		return int64(uval) << uint(64-size) >> uint(64-size), true, true
@@ -94,7 +94,7 @@ func (expr BV) AsInt64() (val int64, isLiteral, ok bool) {
 	}
 	// It may have overflowed uint64 just because of sign bits.
 	// Take the slow path.
-	bigVal, _ := expr.AsBigSigned()
+	bigVal, _ := lit.AsBigSigned()
 	if bigVal.Cmp(big.NewInt(math.MaxInt64)) > 0 {
 		return 0, true, false
 	}
@@ -104,10 +104,10 @@ func (expr BV) AsInt64() (val int64, isLiteral, ok bool) {
 	return bigVal.Int64(), true, true
 }
 
-// AsUint64 is like AsInt64, but interprets expr as unsigned and fails
-// if expr cannot be represented as a uint64.
-func (expr BV) AsUint64() (val uint64, isLiteral, ok bool) {
-	return expr.asUint64()
+// AsUint64 is like AsInt64, but interprets lit as unsigned and fails
+// if lit cannot be represented as a uint64.
+func (lit BV) AsUint64() (val uint64, isLiteral, ok bool) {
+	return lit.asUint64()
 }
 
 //go:generate go run genwrap.go -t BV $GOFILE

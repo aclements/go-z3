@@ -55,31 +55,31 @@ func (ctx *Context) FromBigRat(val *big.Rat) Real {
 	return Real(wrapExpr(ctx, cexpr))
 }
 
-// AsRat returns the value of expr as a numerator and denominator Int
-// literals. If expr is not a literal or is not rational, it returns
+// AsRat returns the value of lit as a numerator and denominator Int
+// literals. If lit is not a literal or is not rational, it returns
 // false for isLiteralRational. To round an arbitrary real to be
 // rational, see method Real.Approx.
-func (expr Real) AsRat() (numer, denom Int, isLiteralRational bool) {
-	if expr.astKind() != C.Z3_NUMERAL_AST {
+func (lit Real) AsRat() (numer, denom Int, isLiteralRational bool) {
+	if lit.astKind() != C.Z3_NUMERAL_AST {
 		// Algebraic literals do not count as Z3_NUMERAL_AST,
 		// so this gets all the cases we need.
 		return Int{}, Int{}, false
 	}
 	var cnumer, cdenom C.Z3_ast
-	expr.ctx.do(func() {
-		cnumer = C.Z3_get_numerator(expr.ctx.c, expr.c)
+	lit.ctx.do(func() {
+		cnumer = C.Z3_get_numerator(lit.ctx.c, lit.c)
 	})
-	expr.ctx.do(func() {
-		cdenom = C.Z3_get_denominator(expr.ctx.c, expr.c)
+	lit.ctx.do(func() {
+		cdenom = C.Z3_get_denominator(lit.ctx.c, lit.c)
 	})
-	runtime.KeepAlive(expr)
-	return Int(wrapExpr(expr.ctx, cnumer)), Int(wrapExpr(expr.ctx, cdenom)), true
+	runtime.KeepAlive(lit)
+	return Int(wrapExpr(lit.ctx, cnumer)), Int(wrapExpr(lit.ctx, cdenom)), true
 }
 
-// AsBigRat returns the value of expr as a math/big.Rat. If expr is
-// not a literal or is not rational, it returns nil, false.
-func (expr Real) AsBigRat() (val *big.Rat, isLiteralRational bool) {
-	numer, denom, isLiteralRational := expr.AsRat()
+// AsBigRat returns the value of lit as a math/big.Rat. If lit is not
+// a literal or is not rational, it returns nil, false.
+func (lit Real) AsBigRat() (val *big.Rat, isLiteralRational bool) {
+	numer, denom, isLiteralRational := lit.AsRat()
 	if !isLiteralRational {
 		return nil, false
 	}
@@ -90,29 +90,29 @@ func (expr Real) AsBigRat() (val *big.Rat, isLiteralRational bool) {
 	return &rat, true
 }
 
-// Approx approximates expr as two rational literals, where the
+// Approx approximates lit as two rational literals, where the
 // difference between lower and upper is less than 1/10**precision. If
-// expr is not a literal or is not irrational, it returns false for
+// lit is not an irrational literal, it returns false for
 // isLiteralIrrational.
-func (expr Real) Approx(precision int) (lower, upper Real, isLiteralIrrational bool) {
+func (lit Real) Approx(precision int) (lower, upper Real, isLiteralIrrational bool) {
 	var isAlgebraicNumber bool
-	expr.ctx.do(func() {
+	lit.ctx.do(func() {
 		// Despite the name, this really means an *irrational*
 		// algebraic number.
-		isAlgebraicNumber = z3ToBool(C.Z3_is_algebraic_number(expr.ctx.c, expr.c))
+		isAlgebraicNumber = z3ToBool(C.Z3_is_algebraic_number(lit.ctx.c, lit.c))
 	})
 	if !isAlgebraicNumber {
 		return Real{}, Real{}, false
 	}
 	var clower, cupper C.Z3_ast
-	expr.ctx.do(func() {
-		clower = C.Z3_get_algebraic_number_lower(expr.ctx.c, expr.c, C.unsigned(precision))
+	lit.ctx.do(func() {
+		clower = C.Z3_get_algebraic_number_lower(lit.ctx.c, lit.c, C.unsigned(precision))
 	})
-	expr.ctx.do(func() {
-		cupper = C.Z3_get_algebraic_number_upper(expr.ctx.c, expr.c, C.unsigned(precision))
+	lit.ctx.do(func() {
+		cupper = C.Z3_get_algebraic_number_upper(lit.ctx.c, lit.c, C.unsigned(precision))
 	})
-	runtime.KeepAlive(expr)
-	return Real(wrapExpr(expr.ctx, clower)), Real(wrapExpr(expr.ctx, cupper)), true
+	runtime.KeepAlive(lit)
+	return Real(wrapExpr(lit.ctx, clower)), Real(wrapExpr(lit.ctx, cupper)), true
 }
 
 // TODO: AsBigFloat? AsFloat64? AsFloat32? I don't actually know how

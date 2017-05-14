@@ -39,23 +39,23 @@ func (ctx *Context) IntConst(name string) Int {
 	return ctx.Const(name, ctx.IntSort()).(Int)
 }
 
-// AsInt64 returns the value of expr as an int64. If expr is not a
-// literal, it returns 0, false, false. If expr is a literal, but its
+// AsInt64 returns the value of lit as an int64. If lit is not a
+// literal, it returns 0, false, false. If lit is a literal, but its
 // value cannot be represented as an int64, it returns 0, true, false.
-func (expr Int) AsInt64() (val int64, isLiteral, ok bool) {
-	return expr.asInt64()
+func (lit Int) AsInt64() (val int64, isLiteral, ok bool) {
+	return lit.asInt64()
 }
 
-// AsUint64 is like AsInt64, but returns a uint64 and fails if expr
+// AsUint64 is like AsInt64, but returns a uint64 and fails if lit
 // cannot be represented as a uint64.
-func (expr Int) AsUint64() (val uint64, isLiteral, ok bool) {
-	return expr.asUint64()
+func (lit Int) AsUint64() (val uint64, isLiteral, ok bool) {
+	return lit.asUint64()
 }
 
-// AsBigInt returns the value of expr as a math/big.Int. If expr is
-// not a literal, it returns nil, false.
-func (expr Int) AsBigInt() (val *big.Int, isConst bool) {
-	return expr.asBigInt()
+// AsBigInt returns the value of lit as a math/big.Int. If lit is not
+// a literal, it returns nil, false.
+func (lit Int) AsBigInt() (val *big.Int, isConst bool) {
+	return lit.asBigInt()
 }
 
 //go:generate go run genwrap.go -t Int $GOFILE intreal.go
