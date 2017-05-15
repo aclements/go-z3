@@ -4,7 +4,10 @@
 
 package z3
 
-import "runtime"
+import (
+	"runtime"
+	"unsafe"
+)
 
 /*
 #cgo LDFLAGS: -lz3
@@ -91,4 +94,58 @@ func (ast AST) ID() uint64 {
 	return res
 }
 
-// TODO: AST.AsValue, etc.
+// Kind returns ast's kind.
+func (ast AST) Kind() ASTKind {
+	var res ASTKind
+	ast.ctx.do(func() {
+		res = ASTKind(C.Z3_get_ast_kind(ast.ctx.c, ast.c))
+	})
+	runtime.KeepAlive(ast)
+	return res
+}
+
+// AsValue returns this AST as a symbolic value.
+//
+// It panics if ast is not a value expression. That is, ast must have
+// Kind ASTKindApp, ASTKindNumeral, ASTKindVar, or ASTKindQuantifier.
+func (ast AST) AsValue() Value {
+	kind := ast.Kind()
+	switch kind {
+	case ASTKindApp, ASTKindNumeral, ASTKindVar, ASTKindQuantifier:
+		return value{(*valueImpl)(ast.astImpl), noEq{}}.lift(KindUnknown)
+	}
+	panic("AST has kind " + kind.String() + " which is not a value")
+}
+
+// AsSort returns this AST as a sort.
+//
+// It panics if ast is not a sort expression. That is, ast must have
+// Kind ASTKindSort.
+func (ast AST) AsSort() Sort {
+	if kind := ast.Kind(); kind != ASTKindSort {
+		panic("AST has kind " + kind.String() + ", not ASTKindSort")
+	}
+	// Weirdly, Z3 doesn't provide an API for this. But these are
+	// all just casts.
+	csort := C.Z3_sort(unsafe.Pointer(ast.c))
+	sort := wrapSort(ast.ctx, csort, KindUnknown)
+	runtime.KeepAlive(ast)
+	return sort
+}
+
+// AsFuncDecl returns this AST as a FuncDecl.
+//
+// It panics if ast is not a function declaration expression. That is,
+// ast must have Kind ASTKindFuncDecl.
+func (ast AST) AsFuncDecl() FuncDecl {
+	if kind := ast.Kind(); kind != ASTKindFuncDecl {
+		panic("AST has kind " + kind.String() + ", not ASTKindFuncDecl")
+	}
+	var cfuncdecl C.Z3_func_decl
+	ast.ctx.do(func() {
+		cfuncdecl = C.Z3_to_func_decl(ast.ctx.c, ast.c)
+	})
+	funcdecl := wrapFuncDecl(ast.ctx, cfuncdecl)
+	runtime.KeepAlive(ast)
+	return funcdecl
+}
