@@ -11,7 +11,7 @@ import "runtime"
 */
 import "C"
 
-// Eq returns an expression that is true if l and r are equal.
+// Eq returns a Value that is true if l and r are equal.
 func (l Bool) Eq(r Bool) Bool {
 	ctx := l.ctx
 	var cexpr C.Z3_ast
@@ -23,19 +23,18 @@ func (l Bool) Eq(r Bool) Bool {
 	return Bool(wrapValue(ctx, cexpr))
 }
 
-// NE returns an expression that is true if l and r are not equal.
+// NE returns a Value that is true if l and r are not equal.
 func (l Bool) NE(r Bool) Bool {
 	return l.ctx.Distinct(l, r)
 }
 
-// Distinct returns a boolean expression that is true if no two exprs
-// are equal.
+// Distinct returns a Value that is true if no two vals are equal.
 //
-// All expressions in exprs must have the same sort.
-func (ctx *Context) Distinct(exprs ...Value) Bool {
-	// Generated from logic.go:71.
-	cargs := make([]C.Z3_ast, len(exprs)+0)
-	for i, arg := range exprs {
+// All Values must have the same sort.
+func (ctx *Context) Distinct(vals ...Value) Bool {
+	// Generated from logic.go:70.
+	cargs := make([]C.Z3_ast, len(vals)+0)
+	for i, arg := range vals {
 		cargs[i+0] = arg.impl().c
 	}
 	var cexpr C.Z3_ast
@@ -48,7 +47,7 @@ func (ctx *Context) Distinct(exprs ...Value) Bool {
 
 // Not returns the boolean negation of l.
 func (l Bool) Not() Bool {
-	// Generated from logic.go:75.
+	// Generated from logic.go:74.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -58,13 +57,13 @@ func (l Bool) Not() Bool {
 	return Bool(wrapValue(ctx, cexpr))
 }
 
-// IfThenElse returns an expression whose value is cons is cond is
-// true, otherwise alt.
+// IfThenElse returns a Value equal to cons if cond is true, otherwise
+// alt.
 //
 // cons and alt must have the same sort. The result will have the same
 // sort as cons and alt.
 func (cond Bool) IfThenElse(cons Value, alt Value) Value {
-	// Generated from logic.go:83.
+	// Generated from logic.go:82.
 	ctx := cond.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -76,10 +75,10 @@ func (cond Bool) IfThenElse(cons Value, alt Value) Value {
 	return wrapValue(ctx, cexpr).lift(KindUnknown)
 }
 
-// Iff returns an expression that is true if l and r are equal (l
+// Iff returns a Value that is true if l and r are equal (l
 // if-and-only-if r).
 func (l Bool) Iff(r Bool) Bool {
-	// Generated from logic.go:88.
+	// Generated from logic.go:87.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -90,9 +89,9 @@ func (l Bool) Iff(r Bool) Bool {
 	return Bool(wrapValue(ctx, cexpr))
 }
 
-// Implies returns an expression that is true if l implies r.
+// Implies returns a Value that is true if l implies r.
 func (l Bool) Implies(r Bool) Bool {
-	// Generated from logic.go:92.
+	// Generated from logic.go:91.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -103,9 +102,9 @@ func (l Bool) Implies(r Bool) Bool {
 	return Bool(wrapValue(ctx, cexpr))
 }
 
-// Xor returns an expression that is true if l xor r.
+// Xor returns a Value that is true if l xor r.
 func (l Bool) Xor(r Bool) Bool {
-	// Generated from logic.go:96.
+	// Generated from logic.go:95.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -116,10 +115,9 @@ func (l Bool) Xor(r Bool) Bool {
 	return Bool(wrapValue(ctx, cexpr))
 }
 
-// And returns an expression that is true if l and all arguments are
-// true.
+// And returns a Value that is true if l and all arguments are true.
 func (l Bool) And(r ...Bool) Bool {
-	// Generated from logic.go:101.
+	// Generated from logic.go:99.
 	ctx := l.ctx
 	cargs := make([]C.Z3_ast, len(r)+1)
 	cargs[0] = l.c
@@ -134,9 +132,9 @@ func (l Bool) And(r ...Bool) Bool {
 	return Bool(wrapValue(ctx, cexpr))
 }
 
-// Or returns an expression that is true if l or any argument is true.
+// Or returns a Value that is true if l or any argument is true.
 func (l Bool) Or(r ...Bool) Bool {
-	// Generated from logic.go:105.
+	// Generated from logic.go:103.
 	ctx := l.ctx
 	cargs := make([]C.Z3_ast, len(r)+1)
 	cargs[0] = l.c

@@ -92,11 +92,11 @@ import "C"
 }
 
 func genCommon(w *bytes.Buffer) {
-	fmt.Fprintln(w, "// Eq returns an expression that is true if l and r are equal.")
+	fmt.Fprintln(w, "// Eq returns a Value that is true if l and r are equal.")
 	dir := parseDirective(strings.Fields("//wrap:expr Eq:Bool Z3_mk_eq l r"))
 	genMethod(w, dir, "")
 
-	fmt.Fprintf(w, `// NE returns an expression that is true if l and r are not equal.
+	fmt.Fprintf(w, `// NE returns a Value that is true if l and r are not equal.
 func (l %s) NE(r %s) Bool {
 	return l.ctx.Distinct(l, r)
 }

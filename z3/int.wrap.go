@@ -11,7 +11,7 @@ import "runtime"
 */
 import "C"
 
-// Eq returns an expression that is true if l and r are equal.
+// Eq returns a Value that is true if l and r are equal.
 func (l Int) Eq(r Int) Bool {
 	ctx := l.ctx
 	var cexpr C.Z3_ast
@@ -23,7 +23,7 @@ func (l Int) Eq(r Int) Bool {
 	return Bool(wrapValue(ctx, cexpr))
 }
 
-// NE returns an expression that is true if l and r are not equal.
+// NE returns a Value that is true if l and r are not equal.
 func (l Int) NE(r Int) Bool {
 	return l.ctx.Distinct(l, r)
 }
@@ -35,7 +35,7 @@ func (l Int) NE(r Int) Bool {
 // Note that this differs from Go division: Go rounds toward zero
 // (truncated division), whereas this rounds toward -inf.
 func (l Int) Div(r Int) Int {
-	// Generated from int.go:70.
+	// Generated from int.go:68.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -50,7 +50,7 @@ func (l Int) Div(r Int) Int {
 //
 // The sign of the result follows the sign of r.
 func (l Int) Mod(r Int) Int {
-	// Generated from int.go:76.
+	// Generated from int.go:74.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -65,7 +65,7 @@ func (l Int) Mod(r Int) Int {
 //
 // The sign of the result follows the sign of l.
 func (l Int) Rem(r Int) Int {
-	// Generated from int.go:82.
+	// Generated from int.go:80.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -76,9 +76,9 @@ func (l Int) Rem(r Int) Int {
 	return Int(wrapValue(ctx, cexpr))
 }
 
-// ToReal returns an expression that converts l to sort Real.
+// ToReal converts l to sort Real.
 func (l Int) ToReal() Real {
-	// Generated from int.go:86.
+	// Generated from int.go:84.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -90,7 +90,7 @@ func (l Int) ToReal() Real {
 
 // ToBV converts l to a bit-vector of width bits.
 func (l Int) ToBV(bits int) BV {
-	// Generated from int.go:90.
+	// Generated from int.go:88.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {

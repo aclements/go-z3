@@ -11,7 +11,7 @@ import "runtime"
 */
 import "C"
 
-// Eq returns an expression that is true if l and r are equal.
+// Eq returns a Value that is true if l and r are equal.
 func (l Real) Eq(r Real) Bool {
 	ctx := l.ctx
 	var cexpr C.Z3_ast
@@ -23,7 +23,7 @@ func (l Real) Eq(r Real) Bool {
 	return Bool(wrapValue(ctx, cexpr))
 }
 
-// NE returns an expression that is true if l and r are not equal.
+// NE returns a Value that is true if l and r are not equal.
 func (l Real) NE(r Real) Bool {
 	return l.ctx.Distinct(l, r)
 }
@@ -32,7 +32,7 @@ func (l Real) NE(r Real) Bool {
 //
 // If r is 0, the result is unconstrained.
 func (l Real) Div(r Real) Real {
-	// Generated from real.go:127.
+	// Generated from real.go:137.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -47,7 +47,7 @@ func (l Real) Div(r Real) Real {
 //
 // Note that this is not truncation. For example, ToInt(-1.3) is -2.
 func (l Real) ToInt() Int {
-	// Generated from real.go:133.
+	// Generated from real.go:143.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -59,7 +59,7 @@ func (l Real) ToInt() Int {
 
 // IsInt returns a Value that is true if l has no fractional part.
 func (l Real) IsInt() Bool {
-	// Generated from real.go:138.
+	// Generated from real.go:147.
 	ctx := l.ctx
 	var cexpr C.Z3_ast
 	ctx.do(func() {

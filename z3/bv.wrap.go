@@ -11,7 +11,7 @@ import "runtime"
 */
 import "C"
 
-// Eq returns an expression that is true if l and r are equal.
+// Eq returns a Value that is true if l and r are equal.
 func (l BV) Eq(r BV) Bool {
 	ctx := l.ctx
 	var cexpr C.Z3_ast
@@ -23,7 +23,7 @@ func (l BV) Eq(r BV) Bool {
 	return Bool(wrapValue(ctx, cexpr))
 }
 
-// NE returns an expression that is true if l and r are not equal.
+// NE returns a Value that is true if l and r are not equal.
 func (l BV) NE(r BV) Bool {
 	return l.ctx.Distinct(l, r)
 }
