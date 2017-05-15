@@ -95,15 +95,14 @@ func (f FuncDecl) String() string {
 	return res
 }
 
-// Equal returns true if f and o are the same function.
-func (f FuncDecl) Equal(o FuncDecl) bool {
-	var out bool
+// AsAST returns the AST representation of f.
+func (f FuncDecl) AsAST() AST {
+	var cast C.Z3_ast
 	f.ctx.do(func() {
-		out = z3ToBool(C.Z3_is_eq_func_decl(f.ctx.c, f.c, o.c))
+		cast = C.Z3_func_decl_to_ast(f.ctx.c, f.c)
 	})
 	runtime.KeepAlive(f)
-	runtime.KeepAlive(o)
-	return out
+	return wrapAST(f.ctx, cast)
 }
 
 // Apply creates an expression that applies function f to arguments

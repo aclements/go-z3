@@ -75,13 +75,13 @@ func (s Sort) BVSize() int {
 	return size
 }
 
-// Equal returns true if s and o are structurally identical.
-func (s Sort) Equal(o Sort) bool {
-	var out bool
+// AsAST returns the AST representation of s.
+func (s Sort) AsAST() AST {
+	var cast C.Z3_ast
 	s.ctx.do(func() {
-		out = z3ToBool(C.Z3_is_eq_sort(s.ctx.c, s.c, o.c))
+		cast = C.Z3_sort_to_ast(s.ctx.c, s.c)
 	})
+	ast := wrapAST(s.ctx, cast)
 	runtime.KeepAlive(s)
-	runtime.KeepAlive(o)
-	return out
+	return ast
 }

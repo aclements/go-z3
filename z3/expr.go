@@ -20,9 +20,13 @@ import "C"
 // TODO: Should the various Expr types disallow explicit conversion?
 // Right now they all have the same underlying type.
 
-// An Expr is a Z3 expression AST.
+// TODO: Given the AST type, should Expr be renamed Value to more
+// clearly separate out the AST representing an expression from the
+// symbolic value it represents?
+
+// An Expr is a Z3 expression representing a symbolic value.
 //
-// This package exports a concrete type for each different sort of
+// This package exports a concrete type for each different kind of
 // expression, such as Bool, BV, and Int. These concrete types provide
 // methods for constructing new expressions.
 //
@@ -31,13 +35,9 @@ import "C"
 // static type safety. However, by no means does this fully capture
 // Z3's type system, so dynamic type checking can still fail.
 type Expr interface {
-	// Equal returns true if this expression and o are
-	// structurally identical.
-	//
-	// This is distinct from creating an expression that
-	// represents equality of two other expressions. For that, see
-	// the Eq method of concrete implementations of Expr.
-	Equal(o Expr) bool
+	// AsAST returns this Expr as the abstract syntax tree
+	// underlying the expression.
+	AsAST() AST
 
 	// Sort returns this expression's sort.
 	Sort() Sort
@@ -173,16 +173,11 @@ func (expr *exprImpl) String() string {
 	return res
 }
 
-// Equal returns true if expr and o are structurally identical.
-func (expr *exprImpl) Equal(o Expr) bool {
-	var out bool
-	oexpr := o.impl()
-	expr.ctx.do(func() {
-		out = z3ToBool(C.Z3_is_eq_ast(expr.ctx.c, expr.c, oexpr.c))
-	})
+// AsAST returns the abstract syntax tree underlying expr.
+func (expr *exprImpl) AsAST() AST {
+	ast := wrapAST(expr.ctx, expr.c)
 	runtime.KeepAlive(expr)
-	runtime.KeepAlive(oexpr)
-	return out
+	return ast
 }
 
 // Sort returns expr's sort.
