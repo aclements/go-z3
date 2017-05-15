@@ -20,7 +20,7 @@ func (l Real) Eq(r Real) Bool {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return Bool(wrapExpr(ctx, cexpr))
+	return Bool(wrapValue(ctx, cexpr))
 }
 
 // NE returns an expression that is true if l and r are not equal.
@@ -40,7 +40,7 @@ func (l Real) Div(r Real) Real {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return Real(wrapExpr(ctx, cexpr))
+	return Real(wrapValue(ctx, cexpr))
 }
 
 // ToInt returns the floor of l as sort Int.
@@ -54,7 +54,7 @@ func (l Real) ToInt() Int {
 		cexpr = C.Z3_mk_real2int(ctx.c, l.c)
 	})
 	runtime.KeepAlive(l)
-	return Int(wrapExpr(ctx, cexpr))
+	return Int(wrapValue(ctx, cexpr))
 }
 
 // IsInt returns a Value that is true if l has no fractional part.
@@ -66,7 +66,7 @@ func (l Real) IsInt() Bool {
 		cexpr = C.Z3_mk_is_int(ctx.c, l.c)
 	})
 	runtime.KeepAlive(l)
-	return Bool(wrapExpr(ctx, cexpr))
+	return Bool(wrapValue(ctx, cexpr))
 }
 
 // Add returns the sum l + r[0] + r[1] + ...
@@ -83,7 +83,7 @@ func (l Real) Add(r ...Real) Real {
 		cexpr = C.Z3_mk_add(ctx.c, C.uint(len(cargs)), &cargs[0])
 	})
 	runtime.KeepAlive(&cargs[0])
-	return Real(wrapExpr(ctx, cexpr))
+	return Real(wrapValue(ctx, cexpr))
 }
 
 // Mul returns the product l * r[0] * r[1] * ...
@@ -100,7 +100,7 @@ func (l Real) Mul(r ...Real) Real {
 		cexpr = C.Z3_mk_mul(ctx.c, C.uint(len(cargs)), &cargs[0])
 	})
 	runtime.KeepAlive(&cargs[0])
-	return Real(wrapExpr(ctx, cexpr))
+	return Real(wrapValue(ctx, cexpr))
 }
 
 // Sub returns l - r[0] - r[1] - ...
@@ -117,7 +117,7 @@ func (l Real) Sub(r ...Real) Real {
 		cexpr = C.Z3_mk_sub(ctx.c, C.uint(len(cargs)), &cargs[0])
 	})
 	runtime.KeepAlive(&cargs[0])
-	return Real(wrapExpr(ctx, cexpr))
+	return Real(wrapValue(ctx, cexpr))
 }
 
 // Neg returns -l.
@@ -129,7 +129,7 @@ func (l Real) Neg() Real {
 		cexpr = C.Z3_mk_unary_minus(ctx.c, l.c)
 	})
 	runtime.KeepAlive(l)
-	return Real(wrapExpr(ctx, cexpr))
+	return Real(wrapValue(ctx, cexpr))
 }
 
 // Exp returns lᶠ.
@@ -142,7 +142,7 @@ func (l Real) Exp(r Real) Real {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return Real(wrapExpr(ctx, cexpr))
+	return Real(wrapValue(ctx, cexpr))
 }
 
 // LT returns l < r.
@@ -155,7 +155,7 @@ func (l Real) LT(r Real) Real {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return Real(wrapExpr(ctx, cexpr))
+	return Real(wrapValue(ctx, cexpr))
 }
 
 // LE returns l <= r.
@@ -168,7 +168,7 @@ func (l Real) LE(r Real) Real {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return Real(wrapExpr(ctx, cexpr))
+	return Real(wrapValue(ctx, cexpr))
 }
 
 // GT returns l > r.
@@ -181,7 +181,7 @@ func (l Real) GT(r Real) Real {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return Real(wrapExpr(ctx, cexpr))
+	return Real(wrapValue(ctx, cexpr))
 }
 
 // GE returns l >= r.
@@ -194,5 +194,5 @@ func (l Real) GE(r Real) Real {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return Real(wrapExpr(ctx, cexpr))
+	return Real(wrapValue(ctx, cexpr))
 }

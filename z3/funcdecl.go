@@ -120,7 +120,7 @@ func (f FuncDecl) Apply(args ...Value) Value {
 		cexpr = C.Z3_mk_app(f.ctx.c, f.c, C.uint(len(cargs)), &cargs[0])
 	})
 	runtime.KeepAlive(&cargs[0])
-	return wrapExpr(f.ctx, cexpr).lift(KindUnknown)
+	return wrapValue(f.ctx, cexpr).lift(KindUnknown)
 }
 
 // TODO: Lots of accessors

@@ -15,10 +15,10 @@ import "math/big"
 // Int is a symbolic value representing an integer with infinite precision.
 //
 // Int implements Value.
-type Int expr
+type Int value
 
 func init() {
-	kindWrappers[KindInt] = func(x expr) Value {
+	kindWrappers[KindInt] = func(x value) Value {
 		return Int(x)
 	}
 }

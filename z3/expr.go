@@ -42,43 +42,43 @@ type Value interface {
 	String() string
 
 	astKind() C.Z3_ast_kind
-	impl() *exprImpl
+	impl() *valueImpl
 }
 
 type noEq struct {
 	_ [0]func()
 }
 
-// expr is a general wrapper for the Z3_ast type. Expression values
+// value is a general wrapper for the Z3_ast type. Expression values
 // are implemented as public types corresponding to Z3 sorts that are
-// named types for expr.
-type expr struct {
-	// *exprImpl is the internal state of expr. This is wrapped
-	// and unexported so we can attach a finalizer to the exprImpl
+// named types for value.
+type value struct {
+	// *valueImpl is the internal state of the value. This is wrapped
+	// and unexported so we can attach a finalizer to the valueImpl
 	// object without any possibility of user code copying the
 	// underlying wrapper and breaking our tracking.
-	*exprImpl
+	*valueImpl
 
-	// noEq prevents user code from directly comparing exprs for
+	// noEq prevents user code from directly comparing values for
 	// equality.
 	noEq
 }
 
-type exprImpl astImpl
+type valueImpl astImpl
 
-func wrapExpr(ctx *Context, c C.Z3_ast) expr {
-	return expr{(*exprImpl)(wrapAST(ctx, c).astImpl), noEq{}}
+func wrapValue(ctx *Context, c C.Z3_ast) value {
+	return value{(*valueImpl)(wrapAST(ctx, c).astImpl), noEq{}}
 }
 
 // lift wraps x in the appropriate Value type. kind must be x's kind if
 // known or otherwise SortUnknown.
-func (x expr) lift(kind Kind) Value {
+func (x value) lift(kind Kind) Value {
 	if kind == KindUnknown {
 		kind = x.Sort().Kind()
 	}
 	wrap, ok := kindWrappers[kind]
 	if !ok {
-		panic("expression has unknown kind " + kind.String())
+		panic("value has unknown kind " + kind.String())
 	}
 	return wrap(x)
 }
@@ -93,7 +93,7 @@ func (ctx *Context) Const(name string, sort Sort) Value {
 		cexpr = C.Z3_mk_const(ctx.c, sym, sort.c)
 	})
 	runtime.KeepAlive(sort)
-	return wrapExpr(ctx, cexpr).lift(sort.Kind())
+	return wrapValue(ctx, cexpr).lift(sort.Kind())
 }
 
 // FreshConst returns a constant that is distinct from all other
@@ -106,7 +106,7 @@ func (ctx *Context) FreshConst(prefix string, sort Sort) Value {
 		cexpr = C.Z3_mk_fresh_const(ctx.c, cprefix, sort.c)
 	})
 	runtime.KeepAlive(sort)
-	return wrapExpr(ctx, cexpr).lift(sort.Kind())
+	return wrapValue(ctx, cexpr).lift(sort.Kind())
 }
 
 // FromBigInt returns a literal whose value is val. sort must have
@@ -119,7 +119,7 @@ func (ctx *Context) FromBigInt(val *big.Int, sort Sort) Value {
 		cexpr = C.Z3_mk_numeral(ctx.c, cstr, sort.c)
 	})
 	runtime.KeepAlive(sort)
-	return wrapExpr(ctx, cexpr).lift(sort.Kind())
+	return wrapValue(ctx, cexpr).lift(sort.Kind())
 }
 
 // FromInt returns a literal whose value is val. sort must have kind
@@ -132,15 +132,15 @@ func (ctx *Context) FromInt(val int64, sort Sort) Value {
 		cexpr = C.Z3_mk_int64(ctx.c, C.__int64(val), sort.c)
 	})
 	runtime.KeepAlive(sort)
-	return wrapExpr(ctx, cexpr).lift(sort.Kind())
+	return wrapValue(ctx, cexpr).lift(sort.Kind())
 }
 
-func (expr *exprImpl) impl() *exprImpl {
+func (expr *valueImpl) impl() *valueImpl {
 	return expr
 }
 
 // String returns a string representation of expr.
-func (expr *exprImpl) String() string {
+func (expr *valueImpl) String() string {
 	var res string
 	expr.ctx.do(func() {
 		res = C.GoString(C.Z3_ast_to_string(expr.ctx.c, expr.c))
@@ -150,14 +150,14 @@ func (expr *exprImpl) String() string {
 }
 
 // AsAST returns the abstract syntax tree underlying expr.
-func (expr *exprImpl) AsAST() AST {
+func (expr *valueImpl) AsAST() AST {
 	ast := AST{(*astImpl)(expr), noEq{}}
 	runtime.KeepAlive(expr)
 	return ast
 }
 
 // Sort returns expr's sort.
-func (expr *exprImpl) Sort() Sort {
+func (expr *valueImpl) Sort() Sort {
 	var csort C.Z3_sort
 	expr.ctx.do(func() {
 		csort = C.Z3_get_sort(expr.ctx.c, expr.c)
@@ -166,7 +166,7 @@ func (expr *exprImpl) Sort() Sort {
 	return wrapSort(expr.ctx, csort, KindUnknown)
 }
 
-func (expr *exprImpl) astKind() C.Z3_ast_kind {
+func (expr *valueImpl) astKind() C.Z3_ast_kind {
 	var ckind C.Z3_ast_kind
 	expr.ctx.do(func() {
 		ckind = C.Z3_get_ast_kind(expr.ctx.c, expr.c)
@@ -175,7 +175,7 @@ func (expr *exprImpl) astKind() C.Z3_ast_kind {
 	return ckind
 }
 
-func (expr *exprImpl) asBigInt() (val *big.Int, isLiteral bool) {
+func (expr *valueImpl) asBigInt() (val *big.Int, isLiteral bool) {
 	switch expr.Sort().Kind() {
 	default:
 		panic("sort " + expr.Sort().String() + " cannot be represented as a big.Int")
@@ -196,7 +196,7 @@ func (expr *exprImpl) asBigInt() (val *big.Int, isLiteral bool) {
 	return &v, true
 }
 
-func (expr *exprImpl) asInt64() (val int64, isLiteral, ok bool) {
+func (expr *valueImpl) asInt64() (val int64, isLiteral, ok bool) {
 	switch expr.Sort().Kind() {
 	default:
 		panic("sort " + expr.Sort().String() + " cannot be represented as an int64")
@@ -212,7 +212,7 @@ func (expr *exprImpl) asInt64() (val int64, isLiteral, ok bool) {
 	return int64(cval), true, ok
 }
 
-func (expr *exprImpl) asUint64() (val uint64, isLiteral, ok bool) {
+func (expr *valueImpl) asUint64() (val uint64, isLiteral, ok bool) {
 	switch expr.Sort().Kind() {
 	default:
 		panic("sort " + expr.Sort().String() + " cannot be represented as an int64")

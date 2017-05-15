@@ -269,7 +269,7 @@ func genMethod(w *bytes.Buffer, dir *directive, label string) {
 	}
 
 	// Wrap the final C result in a Go result.
-	expr := "wrapExpr(ctx, cexpr)"
+	expr := "wrapValue(ctx, cexpr)"
 	if dir.resType == "Value" {
 		// Determine the concrete type dynamically.
 		fmt.Fprintf(w, " return %s.lift(KindUnknown)", expr)

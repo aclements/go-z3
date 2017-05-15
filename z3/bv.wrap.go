@@ -20,7 +20,7 @@ func (l BV) Eq(r BV) Bool {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return Bool(wrapExpr(ctx, cexpr))
+	return Bool(wrapValue(ctx, cexpr))
 }
 
 // NE returns an expression that is true if l and r are not equal.
@@ -37,7 +37,7 @@ func (l BV) Not() BV {
 		cexpr = C.Z3_mk_bvnot(ctx.c, l.c)
 	})
 	runtime.KeepAlive(l)
-	return BV(wrapExpr(ctx, cexpr))
+	return BV(wrapValue(ctx, cexpr))
 }
 
 // And returns the bit-wise and of l and r.
@@ -52,7 +52,7 @@ func (l BV) And(r BV) BV {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return BV(wrapExpr(ctx, cexpr))
+	return BV(wrapValue(ctx, cexpr))
 }
 
 // Or returns the bit-wise or of l and r.
@@ -67,7 +67,7 @@ func (l BV) Or(r BV) BV {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return BV(wrapExpr(ctx, cexpr))
+	return BV(wrapValue(ctx, cexpr))
 }
 
 // Xor returns the bit-wise xor of l and r.
@@ -82,7 +82,7 @@ func (l BV) Xor(r BV) BV {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return BV(wrapExpr(ctx, cexpr))
+	return BV(wrapValue(ctx, cexpr))
 }
 
 // Nand returns the bit-wise nand of l and r.
@@ -97,7 +97,7 @@ func (l BV) Nand(r BV) BV {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return BV(wrapExpr(ctx, cexpr))
+	return BV(wrapValue(ctx, cexpr))
 }
 
 // Nor returns the bit-wise nor of l and r.
@@ -112,7 +112,7 @@ func (l BV) Nor(r BV) BV {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return BV(wrapExpr(ctx, cexpr))
+	return BV(wrapValue(ctx, cexpr))
 }
 
 // Xnor returns the bit-wise xnor of l and r.
@@ -127,7 +127,7 @@ func (l BV) Xnor(r BV) BV {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return BV(wrapExpr(ctx, cexpr))
+	return BV(wrapValue(ctx, cexpr))
 }
 
 // Neg returns the two's complement negation of l.
@@ -139,7 +139,7 @@ func (l BV) Neg() BV {
 		cexpr = C.Z3_mk_bvneg(ctx.c, l.c)
 	})
 	runtime.KeepAlive(l)
-	return BV(wrapExpr(ctx, cexpr))
+	return BV(wrapValue(ctx, cexpr))
 }
 
 // Add returns the two's complement sum of l and r.
@@ -154,7 +154,7 @@ func (l BV) Add(r BV) BV {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return BV(wrapExpr(ctx, cexpr))
+	return BV(wrapValue(ctx, cexpr))
 }
 
 // Sub returns the two's complement subtraction l minus r.
@@ -169,7 +169,7 @@ func (l BV) Sub(r BV) BV {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return BV(wrapExpr(ctx, cexpr))
+	return BV(wrapValue(ctx, cexpr))
 }
 
 // Mul returns the two's complement product of l and r.
@@ -184,7 +184,7 @@ func (l BV) Mul(r BV) BV {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return BV(wrapExpr(ctx, cexpr))
+	return BV(wrapValue(ctx, cexpr))
 }
 
 // UDiv returns the unsigned quotient of l divided by r.
@@ -199,7 +199,7 @@ func (l BV) UDiv(r BV) BV {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return BV(wrapExpr(ctx, cexpr))
+	return BV(wrapValue(ctx, cexpr))
 }
 
 // SDiv returns the two's complement signed quotient of l divided by r.
@@ -214,7 +214,7 @@ func (l BV) SDiv(r BV) BV {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return BV(wrapExpr(ctx, cexpr))
+	return BV(wrapValue(ctx, cexpr))
 }
 
 // URem returns the unsigned remainder of l divided by r.
@@ -229,7 +229,7 @@ func (l BV) URem(r BV) BV {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return BV(wrapExpr(ctx, cexpr))
+	return BV(wrapValue(ctx, cexpr))
 }
 
 // SRem returns the two's complement signed remainder of l divided by r.
@@ -246,7 +246,7 @@ func (l BV) SRem(r BV) BV {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return BV(wrapExpr(ctx, cexpr))
+	return BV(wrapValue(ctx, cexpr))
 }
 
 // SMod returns the two's complement signed modulus of l divided by r.
@@ -263,7 +263,7 @@ func (l BV) SMod(r BV) BV {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return BV(wrapExpr(ctx, cexpr))
+	return BV(wrapValue(ctx, cexpr))
 }
 
 // ULT returns the l < r, where l and r are unsigned.
@@ -278,7 +278,7 @@ func (l BV) ULT(r BV) Bool {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return Bool(wrapExpr(ctx, cexpr))
+	return Bool(wrapValue(ctx, cexpr))
 }
 
 // SLT returns the l < r, where l and r are signed.
@@ -293,7 +293,7 @@ func (l BV) SLT(r BV) Bool {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return Bool(wrapExpr(ctx, cexpr))
+	return Bool(wrapValue(ctx, cexpr))
 }
 
 // ULE returns the l <= r, where l and r are unsigned.
@@ -308,7 +308,7 @@ func (l BV) ULE(r BV) Bool {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return Bool(wrapExpr(ctx, cexpr))
+	return Bool(wrapValue(ctx, cexpr))
 }
 
 // SLE returns the l <= r, where l and r are signed.
@@ -323,7 +323,7 @@ func (l BV) SLE(r BV) Bool {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return Bool(wrapExpr(ctx, cexpr))
+	return Bool(wrapValue(ctx, cexpr))
 }
 
 // UGE returns the l >= r, where l and r are unsigned.
@@ -338,7 +338,7 @@ func (l BV) UGE(r BV) Bool {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return Bool(wrapExpr(ctx, cexpr))
+	return Bool(wrapValue(ctx, cexpr))
 }
 
 // SGE returns the l >= r, where l and r are signed.
@@ -353,7 +353,7 @@ func (l BV) SGE(r BV) Bool {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return Bool(wrapExpr(ctx, cexpr))
+	return Bool(wrapValue(ctx, cexpr))
 }
 
 // UGT returns the l > r, where l and r are unsigned.
@@ -368,7 +368,7 @@ func (l BV) UGT(r BV) Bool {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return Bool(wrapExpr(ctx, cexpr))
+	return Bool(wrapValue(ctx, cexpr))
 }
 
 // SGT returns the l > r, where l and r are signed.
@@ -383,7 +383,7 @@ func (l BV) SGT(r BV) Bool {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return Bool(wrapExpr(ctx, cexpr))
+	return Bool(wrapValue(ctx, cexpr))
 }
 
 // Concat returns concatenation of l and r.
@@ -399,7 +399,7 @@ func (l BV) Concat(r BV) BV {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return BV(wrapExpr(ctx, cexpr))
+	return BV(wrapValue(ctx, cexpr))
 }
 
 // Extract returns bits [high, low] (inclusive) of l, where bit 0 is
@@ -412,7 +412,7 @@ func (l BV) Extract(high int, low int) BV {
 		cexpr = C.Z3_mk_extract(ctx.c, C.unsigned(high), C.unsigned(low), l.c)
 	})
 	runtime.KeepAlive(l)
-	return BV(wrapExpr(ctx, cexpr))
+	return BV(wrapValue(ctx, cexpr))
 }
 
 // SignExtend returns l sign-extended to a bit-vector of length m+i,
@@ -425,7 +425,7 @@ func (l BV) SignExtend(i int) BV {
 		cexpr = C.Z3_mk_sign_ext(ctx.c, C.unsigned(i), l.c)
 	})
 	runtime.KeepAlive(l)
-	return BV(wrapExpr(ctx, cexpr))
+	return BV(wrapValue(ctx, cexpr))
 }
 
 // ZeroExtend returns l zero-extended to a bit-vector of length m+i,
@@ -438,7 +438,7 @@ func (l BV) ZeroExtend(i int) BV {
 		cexpr = C.Z3_mk_zero_ext(ctx.c, C.unsigned(i), l.c)
 	})
 	runtime.KeepAlive(l)
-	return BV(wrapExpr(ctx, cexpr))
+	return BV(wrapValue(ctx, cexpr))
 }
 
 // Repeat returns l repeated up to length i.
@@ -450,7 +450,7 @@ func (l BV) Repeat(i int) BV {
 		cexpr = C.Z3_mk_repeat(ctx.c, C.unsigned(i), l.c)
 	})
 	runtime.KeepAlive(l)
-	return BV(wrapExpr(ctx, cexpr))
+	return BV(wrapValue(ctx, cexpr))
 }
 
 // Lsh returns l shifted left by i bits.
@@ -467,7 +467,7 @@ func (l BV) Lsh(i BV) BV {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(i)
-	return BV(wrapExpr(ctx, cexpr))
+	return BV(wrapValue(ctx, cexpr))
 }
 
 // URsh returns l logically shifted right by i bits.
@@ -484,7 +484,7 @@ func (l BV) URsh(i BV) BV {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(i)
-	return BV(wrapExpr(ctx, cexpr))
+	return BV(wrapValue(ctx, cexpr))
 }
 
 // SRsh returns l arithmetically shifted right by i bits.
@@ -501,7 +501,7 @@ func (l BV) SRsh(i BV) BV {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(i)
-	return BV(wrapExpr(ctx, cexpr))
+	return BV(wrapValue(ctx, cexpr))
 }
 
 // RotateLeft returns l rotated left by i bits.
@@ -516,7 +516,7 @@ func (l BV) RotateLeft(i BV) BV {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(i)
-	return BV(wrapExpr(ctx, cexpr))
+	return BV(wrapValue(ctx, cexpr))
 }
 
 // RotateRight returns l rotated right by i bits.
@@ -531,7 +531,7 @@ func (l BV) RotateRight(i BV) BV {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(i)
-	return BV(wrapExpr(ctx, cexpr))
+	return BV(wrapValue(ctx, cexpr))
 }
 
 // SToInt converts signed bit-vector l to an integer.
@@ -543,7 +543,7 @@ func (l BV) SToInt() Int {
 		cexpr = C.Z3_mk_bv2int(ctx.c, l.c, C.Z3_TRUE)
 	})
 	runtime.KeepAlive(l)
-	return Int(wrapExpr(ctx, cexpr))
+	return Int(wrapValue(ctx, cexpr))
 }
 
 // UToInt converts unsigned bit-vector l to an integer.
@@ -555,5 +555,5 @@ func (l BV) UToInt() Int {
 		cexpr = C.Z3_mk_bv2int(ctx.c, l.c, C.Z3_FALSE)
 	})
 	runtime.KeepAlive(l)
-	return Int(wrapExpr(ctx, cexpr))
+	return Int(wrapValue(ctx, cexpr))
 }

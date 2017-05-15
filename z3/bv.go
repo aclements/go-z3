@@ -23,10 +23,10 @@ import "C"
 // two's complement signed forms.
 //
 // BV implements Value.
-type BV expr
+type BV value
 
 func init() {
-	kindWrappers[KindBV] = func(x expr) Value {
+	kindWrappers[KindBV] = func(x value) Value {
 		return BV(x)
 	}
 }

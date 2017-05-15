@@ -20,7 +20,7 @@ func (l Bool) Eq(r Bool) Bool {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return Bool(wrapExpr(ctx, cexpr))
+	return Bool(wrapValue(ctx, cexpr))
 }
 
 // NE returns an expression that is true if l and r are not equal.
@@ -43,7 +43,7 @@ func (ctx *Context) Distinct(exprs ...Value) Bool {
 		cexpr = C.Z3_mk_distinct(ctx.c, C.uint(len(cargs)), &cargs[0])
 	})
 	runtime.KeepAlive(&cargs[0])
-	return Bool(wrapExpr(ctx, cexpr))
+	return Bool(wrapValue(ctx, cexpr))
 }
 
 // Not returns the boolean negation of l.
@@ -55,7 +55,7 @@ func (l Bool) Not() Bool {
 		cexpr = C.Z3_mk_not(ctx.c, l.c)
 	})
 	runtime.KeepAlive(l)
-	return Bool(wrapExpr(ctx, cexpr))
+	return Bool(wrapValue(ctx, cexpr))
 }
 
 // IfThenElse returns an expression whose value is cons is cond is
@@ -73,7 +73,7 @@ func (cond Bool) IfThenElse(cons Value, alt Value) Value {
 	runtime.KeepAlive(cond)
 	runtime.KeepAlive(cons)
 	runtime.KeepAlive(alt)
-	return wrapExpr(ctx, cexpr).lift(KindUnknown)
+	return wrapValue(ctx, cexpr).lift(KindUnknown)
 }
 
 // Iff returns an expression that is true if l and r are equal (l
@@ -87,7 +87,7 @@ func (l Bool) Iff(r Bool) Bool {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return Bool(wrapExpr(ctx, cexpr))
+	return Bool(wrapValue(ctx, cexpr))
 }
 
 // Implies returns an expression that is true if l implies r.
@@ -100,7 +100,7 @@ func (l Bool) Implies(r Bool) Bool {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return Bool(wrapExpr(ctx, cexpr))
+	return Bool(wrapValue(ctx, cexpr))
 }
 
 // Xor returns an expression that is true if l xor r.
@@ -113,7 +113,7 @@ func (l Bool) Xor(r Bool) Bool {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return Bool(wrapExpr(ctx, cexpr))
+	return Bool(wrapValue(ctx, cexpr))
 }
 
 // And returns an expression that is true if l and all arguments are
@@ -131,7 +131,7 @@ func (l Bool) And(r ...Bool) Bool {
 		cexpr = C.Z3_mk_and(ctx.c, C.uint(len(cargs)), &cargs[0])
 	})
 	runtime.KeepAlive(&cargs[0])
-	return Bool(wrapExpr(ctx, cexpr))
+	return Bool(wrapValue(ctx, cexpr))
 }
 
 // Or returns an expression that is true if l or any argument is true.
@@ -148,5 +148,5 @@ func (l Bool) Or(r ...Bool) Bool {
 		cexpr = C.Z3_mk_or(ctx.c, C.uint(len(cargs)), &cargs[0])
 	})
 	runtime.KeepAlive(&cargs[0])
-	return Bool(wrapExpr(ctx, cexpr))
+	return Bool(wrapValue(ctx, cexpr))
 }

@@ -27,5 +27,5 @@ func (ctx *Context) Simplify(x Value, _ *futureParams) Value {
 	ctx.do(func() {
 		cexpr = C.Z3_simplify(ctx.c, x.impl().c)
 	})
-	return wrapExpr(ctx, cexpr).lift(KindUnknown)
+	return wrapValue(ctx, cexpr).lift(KindUnknown)
 }

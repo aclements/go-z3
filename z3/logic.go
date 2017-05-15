@@ -15,10 +15,10 @@ import "runtime"
 // Bool is a symbolic value representing "true" or "false".
 //
 // Bool implements Value.
-type Bool expr
+type Bool value
 
 func init() {
-	kindWrappers[KindBool] = func(x expr) Value {
+	kindWrappers[KindBool] = func(x value) Value {
 		return Bool(x)
 	}
 }
@@ -42,7 +42,7 @@ func (ctx *Context) FromBool(val bool) Bool {
 			cexpr = C.Z3_mk_false(ctx.c)
 		}
 	})
-	return Bool(wrapExpr(ctx, cexpr))
+	return Bool(wrapValue(ctx, cexpr))
 }
 
 // BoolConst returns a boolean constant named "name".

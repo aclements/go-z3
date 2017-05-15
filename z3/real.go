@@ -20,10 +20,10 @@ import "C"
 // Real is a symbolic value representing a real number.
 //
 // Real implements Value.
-type Real expr
+type Real value
 
 func init() {
-	kindWrappers[KindReal] = func(x expr) Value {
+	kindWrappers[KindReal] = func(x value) Value {
 		return Real(x)
 	}
 }
@@ -52,7 +52,7 @@ func (ctx *Context) FromBigRat(val *big.Rat) Real {
 		cexpr = C.Z3_mk_numeral(ctx.c, cstr, sort.c)
 	})
 	runtime.KeepAlive(sort)
-	return Real(wrapExpr(ctx, cexpr))
+	return Real(wrapValue(ctx, cexpr))
 }
 
 // AsRat returns the value of lit as a numerator and denominator Int
@@ -69,11 +69,11 @@ func (lit Real) AsRat() (numer, denom Int, isLiteralRational bool) {
 	lit.ctx.do(func() {
 		cnumer = C.Z3_get_numerator(lit.ctx.c, lit.c)
 	})
-	numer = Int(wrapExpr(lit.ctx, cnumer))
+	numer = Int(wrapValue(lit.ctx, cnumer))
 	lit.ctx.do(func() {
 		cdenom = C.Z3_get_denominator(lit.ctx.c, lit.c)
 	})
-	denom = Int(wrapExpr(lit.ctx, cdenom))
+	denom = Int(wrapValue(lit.ctx, cdenom))
 	runtime.KeepAlive(lit)
 	return numer, denom, true
 }
@@ -116,11 +116,11 @@ func (lit Real) Approx(precision int) (lower, upper Real, isLiteralIrrational bo
 	// suggests creating the object and increasing its ref count
 	// have to be done atomically. The same thing happened in
 	// AsRat.
-	lower = Real(wrapExpr(lit.ctx, clower))
+	lower = Real(wrapValue(lit.ctx, clower))
 	lit.ctx.do(func() {
 		cupper = C.Z3_get_algebraic_number_upper(lit.ctx.c, lit.c, C.unsigned(precision))
 	})
-	upper = Real(wrapExpr(lit.ctx, cupper))
+	upper = Real(wrapValue(lit.ctx, cupper))
 	runtime.KeepAlive(lit)
 	return lower, upper, true
 }

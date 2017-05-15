@@ -20,7 +20,7 @@ func (l Int) Eq(r Int) Bool {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return Bool(wrapExpr(ctx, cexpr))
+	return Bool(wrapValue(ctx, cexpr))
 }
 
 // NE returns an expression that is true if l and r are not equal.
@@ -43,7 +43,7 @@ func (l Int) Div(r Int) Int {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return Int(wrapExpr(ctx, cexpr))
+	return Int(wrapValue(ctx, cexpr))
 }
 
 // Mod returns modulus of l / r.
@@ -58,7 +58,7 @@ func (l Int) Mod(r Int) Int {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return Int(wrapExpr(ctx, cexpr))
+	return Int(wrapValue(ctx, cexpr))
 }
 
 // Rem returns remainder of l / r.
@@ -73,7 +73,7 @@ func (l Int) Rem(r Int) Int {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return Int(wrapExpr(ctx, cexpr))
+	return Int(wrapValue(ctx, cexpr))
 }
 
 // ToReal returns an expression that converts l to sort Real.
@@ -85,7 +85,7 @@ func (l Int) ToReal() Real {
 		cexpr = C.Z3_mk_int2real(ctx.c, l.c)
 	})
 	runtime.KeepAlive(l)
-	return Real(wrapExpr(ctx, cexpr))
+	return Real(wrapValue(ctx, cexpr))
 }
 
 // ToBV converts l to a bit-vector of width bits.
@@ -97,7 +97,7 @@ func (l Int) ToBV(bits int) BV {
 		cexpr = C.Z3_mk_int2bv(ctx.c, C.unsigned(bits), l.c)
 	})
 	runtime.KeepAlive(l)
-	return BV(wrapExpr(ctx, cexpr))
+	return BV(wrapValue(ctx, cexpr))
 }
 
 // Add returns the sum l + r[0] + r[1] + ...
@@ -114,7 +114,7 @@ func (l Int) Add(r ...Int) Int {
 		cexpr = C.Z3_mk_add(ctx.c, C.uint(len(cargs)), &cargs[0])
 	})
 	runtime.KeepAlive(&cargs[0])
-	return Int(wrapExpr(ctx, cexpr))
+	return Int(wrapValue(ctx, cexpr))
 }
 
 // Mul returns the product l * r[0] * r[1] * ...
@@ -131,7 +131,7 @@ func (l Int) Mul(r ...Int) Int {
 		cexpr = C.Z3_mk_mul(ctx.c, C.uint(len(cargs)), &cargs[0])
 	})
 	runtime.KeepAlive(&cargs[0])
-	return Int(wrapExpr(ctx, cexpr))
+	return Int(wrapValue(ctx, cexpr))
 }
 
 // Sub returns l - r[0] - r[1] - ...
@@ -148,7 +148,7 @@ func (l Int) Sub(r ...Int) Int {
 		cexpr = C.Z3_mk_sub(ctx.c, C.uint(len(cargs)), &cargs[0])
 	})
 	runtime.KeepAlive(&cargs[0])
-	return Int(wrapExpr(ctx, cexpr))
+	return Int(wrapValue(ctx, cexpr))
 }
 
 // Neg returns -l.
@@ -160,7 +160,7 @@ func (l Int) Neg() Int {
 		cexpr = C.Z3_mk_unary_minus(ctx.c, l.c)
 	})
 	runtime.KeepAlive(l)
-	return Int(wrapExpr(ctx, cexpr))
+	return Int(wrapValue(ctx, cexpr))
 }
 
 // Exp returns lᶠ.
@@ -173,7 +173,7 @@ func (l Int) Exp(r Int) Int {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return Int(wrapExpr(ctx, cexpr))
+	return Int(wrapValue(ctx, cexpr))
 }
 
 // LT returns l < r.
@@ -186,7 +186,7 @@ func (l Int) LT(r Int) Int {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return Int(wrapExpr(ctx, cexpr))
+	return Int(wrapValue(ctx, cexpr))
 }
 
 // LE returns l <= r.
@@ -199,7 +199,7 @@ func (l Int) LE(r Int) Int {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return Int(wrapExpr(ctx, cexpr))
+	return Int(wrapValue(ctx, cexpr))
 }
 
 // GT returns l > r.
@@ -212,7 +212,7 @@ func (l Int) GT(r Int) Int {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return Int(wrapExpr(ctx, cexpr))
+	return Int(wrapValue(ctx, cexpr))
 }
 
 // GE returns l >= r.
@@ -225,5 +225,5 @@ func (l Int) GE(r Int) Int {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return Int(wrapExpr(ctx, cexpr))
+	return Int(wrapValue(ctx, cexpr))
 }
