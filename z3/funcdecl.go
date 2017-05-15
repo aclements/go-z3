@@ -60,9 +60,13 @@ func (ctx *Context) FuncDecl(name string, domain []Sort, range_ Sort) FuncDecl {
 	}
 	var cfuncdecl C.Z3_func_decl
 	ctx.do(func() {
-		cfuncdecl = C.Z3_mk_func_decl(ctx.c, sym, C.uint(len(cdomain)), &cdomain[0], range_.c)
+		var cdp *C.Z3_sort
+		if len(cdomain) > 0 {
+			cdp = &cdomain[0]
+		}
+		cfuncdecl = C.Z3_mk_func_decl(ctx.c, sym, C.uint(len(cdomain)), cdp, range_.c)
 	})
-	runtime.KeepAlive(&domain[0])
+	runtime.KeepAlive(domain)
 	runtime.KeepAlive(range_)
 	return wrapFuncDecl(ctx, cfuncdecl)
 }
@@ -78,9 +82,13 @@ func (ctx *Context) FreshFuncDecl(prefix string, domain []Sort, range_ Sort) Fun
 	}
 	var cfuncdecl C.Z3_func_decl
 	ctx.do(func() {
-		cfuncdecl = C.Z3_mk_fresh_func_decl(ctx.c, cprefix, C.uint(len(cdomain)), &cdomain[0], range_.c)
+		var cdp *C.Z3_sort
+		if len(cdomain) > 0 {
+			cdp = &cdomain[0]
+		}
+		cfuncdecl = C.Z3_mk_fresh_func_decl(ctx.c, cprefix, C.uint(len(cdomain)), cdp, range_.c)
 	})
-	runtime.KeepAlive(&domain[0])
+	runtime.KeepAlive(domain)
 	runtime.KeepAlive(range_)
 	return wrapFuncDecl(ctx, cfuncdecl)
 }
@@ -117,9 +125,13 @@ func (f FuncDecl) Apply(args ...Value) Value {
 	}
 	var cexpr C.Z3_ast
 	f.ctx.do(func() {
-		cexpr = C.Z3_mk_app(f.ctx.c, f.c, C.uint(len(cargs)), &cargs[0])
+		var cap *C.Z3_ast
+		if len(cargs) > 0 {
+			cap = &cargs[0]
+		}
+		cexpr = C.Z3_mk_app(f.ctx.c, f.c, C.uint(len(cargs)), cap)
 	})
-	runtime.KeepAlive(&cargs[0])
+	runtime.KeepAlive(cargs)
 	return wrapValue(f.ctx, cexpr).lift(KindUnknown)
 }
 
