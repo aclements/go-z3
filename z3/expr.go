@@ -64,29 +64,10 @@ type expr struct {
 	noEq
 }
 
-type exprImpl struct {
-	ctx *Context
-	c   C.Z3_ast
-}
+type exprImpl astImpl
 
 func wrapExpr(ctx *Context, c C.Z3_ast) expr {
-	impl := &exprImpl{ctx, c}
-	// Note that, even if c was just returned by an allocation
-	// function, we're still responsible for incrementing its
-	// reference count. This is weird, but also nice because we
-	// can wrap any AST that comes out of the Z3 API, even if
-	// we've already wrapped it, and the reference count will
-	// protect the underlying object no matter what happens to the
-	// Go wrappers.
-	ctx.lock.Lock()
-	C.Z3_inc_ref(ctx.c, c)
-	ctx.lock.Unlock()
-	runtime.SetFinalizer(impl, func(impl *exprImpl) {
-		impl.ctx.do(func() {
-			C.Z3_dec_ref(impl.ctx.c, impl.c)
-		})
-	})
-	return expr{impl, noEq{}}
+	return expr{(*exprImpl)(wrapAST(ctx, c).astImpl), noEq{}}
 }
 
 // lift wraps x in the appropriate Value type. kind must be x's kind if
@@ -170,7 +151,7 @@ func (expr *exprImpl) String() string {
 
 // AsAST returns the abstract syntax tree underlying expr.
 func (expr *exprImpl) AsAST() AST {
-	ast := wrapAST(expr.ctx, expr.c)
+	ast := AST{(*astImpl)(expr), noEq{}}
 	runtime.KeepAlive(expr)
 	return ast
 }

@@ -25,6 +25,13 @@ type astImpl struct {
 
 func wrapAST(ctx *Context, c C.Z3_ast) AST {
 	impl := &astImpl{ctx, c}
+	// Note that, even if c was just returned by an allocation
+	// function, we're still responsible for incrementing its
+	// reference count. This is weird, but also nice because we
+	// can wrap any AST that comes out of the Z3 API, even if
+	// we've already wrapped it, and the reference count will
+	// protect the underlying object no matter what happens to the
+	// Go wrappers.
 	ctx.lock.Lock()
 	C.Z3_inc_ref(ctx.c, c)
 	ctx.lock.Unlock()
