@@ -69,11 +69,13 @@ func (lit Real) AsRat() (numer, denom Int, isLiteralRational bool) {
 	lit.ctx.do(func() {
 		cnumer = C.Z3_get_numerator(lit.ctx.c, lit.c)
 	})
+	numer = Int(wrapExpr(lit.ctx, cnumer))
 	lit.ctx.do(func() {
 		cdenom = C.Z3_get_denominator(lit.ctx.c, lit.c)
 	})
+	denom = Int(wrapExpr(lit.ctx, cdenom))
 	runtime.KeepAlive(lit)
-	return Int(wrapExpr(lit.ctx, cnumer)), Int(wrapExpr(lit.ctx, cdenom)), true
+	return numer, denom, true
 }
 
 // AsBigRat returns the value of lit as a math/big.Rat. If lit is not
@@ -108,11 +110,19 @@ func (lit Real) Approx(precision int) (lower, upper Real, isLiteralIrrational bo
 	lit.ctx.do(func() {
 		clower = C.Z3_get_algebraic_number_lower(lit.ctx.c, lit.c, C.unsigned(precision))
 	})
+	// TODO: If I do the get_algebraic_number_upper before
+	// wrapping the lower (presumably before incrementing its
+	// reference count), Z3 crashes when I try to use lower. This
+	// suggests creating the object and increasing its ref count
+	// have to be done atomically. The same thing happened in
+	// AsRat.
+	lower = Real(wrapExpr(lit.ctx, clower))
 	lit.ctx.do(func() {
 		cupper = C.Z3_get_algebraic_number_upper(lit.ctx.c, lit.c, C.unsigned(precision))
 	})
+	upper = Real(wrapExpr(lit.ctx, cupper))
 	runtime.KeepAlive(lit)
-	return Real(wrapExpr(lit.ctx, clower)), Real(wrapExpr(lit.ctx, cupper)), true
+	return lower, upper, true
 }
 
 // TODO: AsBigFloat? AsFloat64? AsFloat32? I don't actually know how

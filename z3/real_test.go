@@ -5,6 +5,7 @@
 package z3
 
 import (
+	"math"
 	"math/big"
 	"testing"
 )
@@ -34,20 +35,35 @@ func TestRealRational(t *testing.T) {
 }
 
 func TestRealIrrational(t *testing.T) {
-	t.Skipf("need a simplifier") // TODO
-
 	ctx := NewContext(nil)
-	root2 := ctx.FromInt(2, ctx.IntSort()).(Int).ToReal().Exp(ctx.FromBigRat(big.NewRat(1, 2)))
+	root2 := ctx.Simplify(ctx.FromInt(2, ctx.IntSort()).(Int).ToReal().Exp(ctx.FromBigRat(big.NewRat(1, 2))), nil).(Real)
+
 	_, _, isLit := root2.AsRat()
 	if isLit {
 		t.Errorf("(%s).AsRat() returned true", root2)
 	}
 
-	l, r, isLit := root2.Approx(10)
+	l, u, isLit := root2.Approx(10)
 	if !isLit {
 		t.Errorf("(%s).Approx(10) returned false", root2)
 	} else {
-		// TODO: Check l and r.
-		t.Logf("[%v, %v]", l, r)
+		t.Logf("(%s).Approx(10) = [%v, %v]", root2, l, u)
+		lr, isLit := l.AsBigRat()
+		if !isLit {
+			t.Fatalf("lower bound %v is not a literal rational", l)
+		}
+		ur, isLit := u.AsBigRat()
+		if !isLit {
+			t.Fatalf("upper bound %v is not a literal rational", u)
+		}
+		const r2 = 1.4142135623730951
+		lf, _ := lr.Float64()
+		if math.Abs(lf-r2) > 1e-10 {
+			t.Errorf("lower bound |%v - %v| > 1e-10", lf, r2)
+		}
+		uf, _ := ur.Float64()
+		if math.Abs(uf-r2) > 1e-10 {
+			t.Errorf("upper bound |%v - %v| > 1e-10", uf, r2)
+		}
 	}
 }
