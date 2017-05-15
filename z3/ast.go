@@ -94,6 +94,16 @@ func (ast AST) ID() uint64 {
 	return res
 }
 
+// Translate copies ast into the target Context.
+func (ast AST) Translate(target *Context) AST {
+	var res C.Z3_ast
+	target.do(func() {
+		res = C.Z3_translate(ast.ctx.c, ast.c, target.c)
+	})
+	runtime.KeepAlive(ast)
+	return wrapAST(target, res)
+}
+
 // Kind returns ast's kind.
 func (ast AST) Kind() ASTKind {
 	var res ASTKind

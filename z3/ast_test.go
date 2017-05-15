@@ -55,3 +55,10 @@ func TestASTAs(t *testing.T) {
 		}
 	}
 }
+
+func TestASTTranslate(t *testing.T) {
+	ctx1, ctx2 := NewContext(nil), NewContext(nil)
+
+	x := ctx1.BoolConst("x")
+	x.AsAST().Translate(ctx2).AsValue().(Bool).Eq(ctx2.FromBool(true))
+}
