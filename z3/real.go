@@ -17,13 +17,13 @@ import (
 */
 import "C"
 
-// Real is an expression with real sort.
+// Real is a symbolic value representing a real number.
 //
-// Real implements Expr.
+// Real implements Value.
 type Real expr
 
 func init() {
-	kindWrappers[KindReal] = func(x expr) Expr {
+	kindWrappers[KindReal] = func(x expr) Value {
 		return Real(x)
 	}
 }
@@ -142,7 +142,6 @@ func (lit Real) Approx(precision int) (lower, upper Real, isLiteralIrrational bo
 //
 //wrap:expr ToInt:Int Z3_mk_real2int l
 
-// IsInt returns an expression that is true if l has no fractional
-// part.
+// IsInt returns a Value that is true if l has no fractional part.
 //
 //wrap:expr IsInt:Bool Z3_mk_is_int l

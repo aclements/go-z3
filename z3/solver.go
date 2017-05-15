@@ -48,13 +48,13 @@ func NewSolver(ctx *Context) *Solver {
 	return &Solver{impl, noEq{}}
 }
 
-// Assert adds expr to the set of predicates that must be satisfied.
-func (s *Solver) Assert(expr Bool) {
+// Assert adds val to the set of predicates that must be satisfied.
+func (s *Solver) Assert(val Bool) {
 	s.ctx.do(func() {
-		C.Z3_solver_assert(s.ctx.c, s.c, expr.c)
+		C.Z3_solver_assert(s.ctx.c, s.c, val.c)
 	})
 	runtime.KeepAlive(s)
-	runtime.KeepAlive(expr)
+	runtime.KeepAlive(val)
 }
 
 // Push saves the current state of the Solver so it can be restored

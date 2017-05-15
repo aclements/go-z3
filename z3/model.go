@@ -37,23 +37,24 @@ func wrapModel(ctx *Context, c C.Z3_model) *Model {
 	return &Model{impl, noEq{}}
 }
 
-// Eval evaluates expr using the values in model m.
+// Eval evaluates val using the concrete interpretations of constants
+// and functions in model m.
 //
 // If completion is true, it will assign interpretations for any
 // constants or functions that currently don't have an interpretation
-// in m.
+// in m. Otherwise, the resulting value may not be concrete.
 //
-// Eval returns nil is expr cannot be evaluated. This can happen if
-// expr contains a quantifier or is type-incorrect, or if m is a
-// partial model (that is, the option MODEL_PARTIAL was set to true).
-func (m *Model) Eval(expr Expr, completion bool) Expr {
+// Eval returns nil if val cannot be evaluated. This can happen if val
+// contains a quantifier or is type-incorrect, or if m is a partial
+// model (that is, the option MODEL_PARTIAL was set to true).
+func (m *Model) Eval(val Value, completion bool) Value {
 	var out C.Z3_ast
 	var ok bool
 	m.ctx.do(func() {
-		ok = z3ToBool(C.Z3_model_eval(m.ctx.c, m.c, expr.impl().c, boolToZ3(completion), &out))
+		ok = z3ToBool(C.Z3_model_eval(m.ctx.c, m.c, val.impl().c, boolToZ3(completion), &out))
 	})
 	runtime.KeepAlive(m)
-	runtime.KeepAlive(expr)
+	runtime.KeepAlive(val)
 	if !ok {
 		return nil
 	}

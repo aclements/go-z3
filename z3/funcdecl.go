@@ -21,8 +21,8 @@ import "C"
 // A FuncDecl can represent either a interpreted function like "+" or
 // an uninterpreted function created by Context.FuncDecl.
 //
-// A FuncDecl can be used in an expression by applying it to a set of
-// arguments.
+// A FuncDecl can be applied to a set of arguments to create a Value
+// representing the result of the function.
 type FuncDecl struct {
 	*funcDeclImpl
 	noEq
@@ -105,12 +105,12 @@ func (f FuncDecl) AsAST() AST {
 	return wrapAST(f.ctx, cast)
 }
 
-// Apply creates an expression that applies function f to arguments
+// Apply creates a Value representing the result of applying f to
 // args.
 //
 // The sorts of args must be the domain of f. The sort of the
-// resulting expression will be f's range.
-func (f FuncDecl) Apply(args ...Expr) Expr {
+// resulting value will be f's range.
+func (f FuncDecl) Apply(args ...Value) Value {
 	cargs := make([]C.Z3_ast, len(args))
 	for i, arg := range args {
 		cargs[i] = arg.impl().c

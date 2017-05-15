@@ -172,8 +172,8 @@ func parseDirective(parts []string) *directive {
 			fmt.Fprintf(os.Stderr, "reference to unknown argument %q", name)
 			os.Exit(1)
 		}
-		if cTyp == "" && arg.goTyp == "Expr" {
-			arg.cExpr = "%s.impl().c" // Expr interface
+		if cTyp == "" && arg.goTyp == "Value" {
+			arg.cExpr = "%s.impl().c" // Value interface
 		} else if cTyp == "" {
 			arg.cExpr = "%s.c" // expr wrapper
 		} else {
@@ -270,7 +270,7 @@ func genMethod(w *bytes.Buffer, dir *directive, label string) {
 
 	// Wrap the final C result in a Go result.
 	expr := "wrapExpr(ctx, cexpr)"
-	if dir.resType == "Expr" {
+	if dir.resType == "Value" {
 		// Determine the concrete type dynamically.
 		fmt.Fprintf(w, " return %s.lift(KindUnknown)", expr)
 	} else {

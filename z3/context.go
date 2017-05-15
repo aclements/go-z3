@@ -17,12 +17,12 @@ import (
 */
 import "C"
 
-// Context is an environment for creating expressions and checking
+// Context is an environment for creating symbolic values and checking
 // satisfiability.
 //
 // Nearly all interaction with Z3 is done relative to a Context.
-// Expressions are bound to the Context that created them and cannot
-// be combined with expressions from other Contexts.
+// Values are bound to the Context that created them and cannot be
+// combined with Values from other Contexts.
 //
 // Context is thread-safe. However, most operations block other
 // operations (one notable exception is Interrupt). Hence, to do

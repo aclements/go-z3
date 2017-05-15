@@ -32,7 +32,7 @@ func (l Bool) NE(r Bool) Bool {
 // are equal.
 //
 // All expressions in exprs must have the same sort.
-func (ctx *Context) Distinct(exprs ...Expr) Bool {
+func (ctx *Context) Distinct(exprs ...Value) Bool {
 	// Generated from logic.go:71.
 	cargs := make([]C.Z3_ast, len(exprs)+0)
 	for i, arg := range exprs {
@@ -63,7 +63,7 @@ func (l Bool) Not() Bool {
 //
 // cons and alt must have the same sort. The result will have the same
 // sort as cons and alt.
-func (cond Bool) IfThenElse(cons Expr, alt Expr) Expr {
+func (cond Bool) IfThenElse(cons Value, alt Value) Value {
 	// Generated from logic.go:83.
 	ctx := cond.ctx
 	var cexpr C.Z3_ast

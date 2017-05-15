@@ -15,9 +15,9 @@ import (
 */
 import "C"
 
-// Sort represents the type of the Expr. A Sort can be a basic type
-// such as int or bool or a parameterized type such as a 30 bit wide
-// bit-vector or an array from int to bool.
+// Sort represents the type of a symbolic value. A Sort can be a basic
+// type such as "int" or "bool" or a parameterized type such as
+// "bit-vector of 30 bits" or "array from int to bool".
 type Sort struct {
 	*sortImpl
 	noEq

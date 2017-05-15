@@ -16,17 +16,17 @@ import (
 */
 import "C"
 
-// BV is an expression with bit-vector sort.
+// BV is a symbolic value representing a bit-vector.
 //
 // Bit vectors correspond to machine words. They have finite domains
 // of size 2^n and implement modular arithmetic in both unsigned and
 // two's complement signed forms.
 //
-// BV implements Expr.
+// BV implements Value.
 type BV expr
 
 func init() {
-	kindWrappers[KindBV] = func(x expr) Expr {
+	kindWrappers[KindBV] = func(x expr) Value {
 		return BV(x)
 	}
 }

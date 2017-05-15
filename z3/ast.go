@@ -83,3 +83,5 @@ func (ast AST) ID() uint64 {
 	runtime.KeepAlive(ast)
 	return res
 }
+
+// TODO: AST.AsValue, etc.

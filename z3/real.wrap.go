@@ -57,8 +57,7 @@ func (l Real) ToInt() Int {
 	return Int(wrapExpr(ctx, cexpr))
 }
 
-// IsInt returns an expression that is true if l has no fractional
-// part.
+// IsInt returns a Value that is true if l has no fractional part.
 func (l Real) IsInt() Bool {
 	// Generated from real.go:138.
 	ctx := l.ctx

@@ -12,15 +12,13 @@ package z3
 import "C"
 import "math/big"
 
-// Int is an expression with int sort.
+// Int is a symbolic value representing an integer with infinite precision.
 //
-// Ints are mathematical integers with infinite precision.
-//
-// Int implements Expr.
+// Int implements Value.
 type Int expr
 
 func init() {
-	kindWrappers[KindInt] = func(x expr) Expr {
+	kindWrappers[KindInt] = func(x expr) Value {
 		return Int(x)
 	}
 }
@@ -81,7 +79,7 @@ func (lit Int) AsBigInt() (val *big.Int, isConst bool) {
 //
 //wrap:expr Rem Z3_mk_rem l r
 
-// ToReal returns an expression that converts l to sort Real.
+// ToReal converts l to sort Real.
 //
 //wrap:expr ToReal:Real Z3_mk_int2real l
 

@@ -17,33 +17,28 @@ import (
 */
 import "C"
 
-// TODO: Should the various Expr types disallow explicit conversion?
+// TODO: Should the various Value types disallow explicit conversion?
 // Right now they all have the same underlying type.
 
-// TODO: Given the AST type, should Expr be renamed Value to more
-// clearly separate out the AST representing an expression from the
-// symbolic value it represents?
-
-// An Expr is a Z3 expression representing a symbolic value.
+// An Value is a symbolic value (a Z3 expression).
 //
 // This package exports a concrete type for each different kind of
-// expression, such as Bool, BV, and Int. These concrete types provide
-// methods for constructing new expressions.
+// value, such as Bool, BV, and Int. These concrete types provide
+// methods for deriving other values.
 //
 // Having separate types for each kind separates which methods can be
-// applied to which kind of expression and provides some level of
-// static type safety. However, by no means does this fully capture
-// Z3's type system, so dynamic type checking can still fail.
-type Expr interface {
-	// AsAST returns this Expr as the abstract syntax tree
-	// underlying the expression.
+// applied to which kind of value and provides some level of static
+// type safety. However, by no means does this fully capture Z3's type
+// system, so dynamic type checking can still fail.
+type Value interface {
+	// AsAST returns the abstract syntax tree underlying this
+	// Value.
 	AsAST() AST
 
-	// Sort returns this expression's sort.
+	// Sort returns this value's sort.
 	Sort() Sort
 
-	// String returns this expression represented as a
-	// s-expression string.
+	// String returns an S-expression representation of this value.
 	String() string
 
 	astKind() C.Z3_ast_kind
@@ -94,9 +89,9 @@ func wrapExpr(ctx *Context, c C.Z3_ast) expr {
 	return expr{impl, noEq{}}
 }
 
-// lift wraps x in the appropriate Expr type. kind must be x's kind if
+// lift wraps x in the appropriate Value type. kind must be x's kind if
 // known or otherwise SortUnknown.
-func (x expr) lift(kind Kind) Expr {
+func (x expr) lift(kind Kind) Value {
 	if kind == KindUnknown {
 		kind = x.Sort().Kind()
 	}
@@ -110,7 +105,7 @@ func (x expr) lift(kind Kind) Expr {
 // Const returns a constant named "name" of the given sort. This
 // constant will be same as all other constants created with this
 // name.
-func (ctx *Context) Const(name string, sort Sort) Expr {
+func (ctx *Context) Const(name string, sort Sort) Value {
 	sym := ctx.symbol(name)
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -122,7 +117,7 @@ func (ctx *Context) Const(name string, sort Sort) Expr {
 
 // FreshConst returns a constant that is distinct from all other
 // constants. The name will begin with "prefix".
-func (ctx *Context) FreshConst(prefix string, sort Sort) Expr {
+func (ctx *Context) FreshConst(prefix string, sort Sort) Value {
 	cprefix := C.CString(prefix)
 	defer C.free(unsafe.Pointer(cprefix))
 	var cexpr C.Z3_ast
@@ -135,7 +130,7 @@ func (ctx *Context) FreshConst(prefix string, sort Sort) Expr {
 
 // FromBigInt returns a literal whose value is val. sort must have
 // kind int, real, finite-domain, or bit-vector.
-func (ctx *Context) FromBigInt(val *big.Int, sort Sort) Expr {
+func (ctx *Context) FromBigInt(val *big.Int, sort Sort) Value {
 	cstr := C.CString(val.Text(10))
 	defer C.free(unsafe.Pointer(cstr))
 	var cexpr C.Z3_ast
@@ -148,7 +143,7 @@ func (ctx *Context) FromBigInt(val *big.Int, sort Sort) Expr {
 
 // FromInt returns a literal whose value is val. sort must have kind
 // int, real, finite-domain, or bit-vector.
-func (ctx *Context) FromInt(val int64, sort Sort) Expr {
+func (ctx *Context) FromInt(val int64, sort Sort) Value {
 	var cexpr C.Z3_ast
 	ctx.do(func() {
 		// Z3_mk_int64 doesn't say real sorts are accepted,

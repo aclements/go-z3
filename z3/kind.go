@@ -11,8 +11,8 @@ import "strconv"
 */
 import "C"
 
-// kindWrappers is a map of Expr constructors for each sort kind.
-var kindWrappers = make(map[Kind]func(x expr) Expr)
+// kindWrappers is a map of Value constructors for each sort kind.
+var kindWrappers = make(map[Kind]func(x expr) Value)
 
 // Kind is a general category of sorts, such as int or array.
 type Kind int

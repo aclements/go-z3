@@ -12,6 +12,8 @@ import "C"
 
 // TODO: Implement simplifier options.
 
+// TODO: Should this be over ASTs?
+
 type futureParams struct{}
 
 // Simplify simplifies expression x.
@@ -20,7 +22,7 @@ type futureParams struct{}
 // it must be nil, which means to use the default parameters.
 //
 // The resulting expression will have the same sort as x.
-func (ctx *Context) Simplify(x Expr, _ *futureParams) Expr {
+func (ctx *Context) Simplify(x Value, _ *futureParams) Value {
 	var cexpr C.Z3_ast
 	ctx.do(func() {
 		cexpr = C.Z3_simplify(ctx.c, x.impl().c)

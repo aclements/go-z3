@@ -12,13 +12,13 @@ package z3
 import "C"
 import "runtime"
 
-// Bool is an expression with boolean sort.
+// Bool is a symbolic value representing "true" or "false".
 //
-// Bool implements Expr.
+// Bool implements Value.
 type Bool expr
 
 func init() {
-	kindWrappers[KindBool] = func(x expr) Expr {
+	kindWrappers[KindBool] = func(x expr) Value {
 		return Bool(x)
 	}
 }
@@ -32,7 +32,7 @@ func (ctx *Context) BoolSort() Sort {
 	return wrapSort(ctx, csort, KindBool)
 }
 
-// FromBool returns a boolean expression with value val.
+// FromBool returns a boolean value with value val.
 func (ctx *Context) FromBool(val bool) Bool {
 	var cexpr C.Z3_ast
 	ctx.do(func() {
@@ -63,43 +63,41 @@ func (l Bool) AsBool() (val bool, isLiteral bool) {
 
 //go:generate go run genwrap.go -t Bool $GOFILE
 
-// Distinct returns a boolean expression that is true if no two exprs
-// are equal.
+// Distinct returns a Value that is true if no two vals are equal.
 //
-// All expressions in exprs must have the same sort.
+// All Values must have the same sort.
 //
-//wrap:expr Distinct ctx:*Context exprs...:Expr : Z3_mk_distinct exprs...
+//wrap:expr Distinct ctx:*Context vals...:Value : Z3_mk_distinct vals...
 
 // Not returns the boolean negation of l.
 //
 //wrap:expr Not Z3_mk_not l
 
-// IfThenElse returns an expression whose value is cons is cond is
-// true, otherwise alt.
+// IfThenElse returns a Value equal to cons if cond is true, otherwise
+// alt.
 //
 // cons and alt must have the same sort. The result will have the same
 // sort as cons and alt.
 //
-//wrap:expr IfThenElse:Expr cond cons:Expr alt:Expr : Z3_mk_ite cond cons alt
+//wrap:expr IfThenElse:Value cond cons:Value alt:Value : Z3_mk_ite cond cons alt
 
-// Iff returns an expression that is true if l and r are equal (l
+// Iff returns a Value that is true if l and r are equal (l
 // if-and-only-if r).
 //
 //wrap:expr Iff Z3_mk_iff l r
 
-// Implies returns an expression that is true if l implies r.
+// Implies returns a Value that is true if l implies r.
 //
 //wrap:expr Implies Z3_mk_implies l r
 
-// Xor returns an expression that is true if l xor r.
+// Xor returns a Value that is true if l xor r.
 //
 //wrap:expr Xor Z3_mk_xor l r
 
-// And returns an expression that is true if l and all arguments are
-// true.
+// And returns a Value that is true if l and all arguments are true.
 //
 //wrap:expr And Z3_mk_and l r...
 
-// Or returns an expression that is true if l or any argument is true.
+// Or returns a Value that is true if l or any argument is true.
 //
 //wrap:expr Or Z3_mk_or l r...
