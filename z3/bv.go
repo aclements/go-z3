@@ -116,6 +116,16 @@ func (lit BV) AsUint64() (val uint64, isLiteral, ok bool) {
 //
 //wrap:expr Not Z3_mk_bvnot l
 
+// AllBits returns a 1-bit bit-vector that is the bit-wise "and" of
+// all bits.
+//
+//wrap:expr AllBits Z3_mk_bvredand l
+
+// AnyBits returns a 1-bit bit-vector that is the bit-wise "or" of all
+// bits.
+//
+//wrap:expr AnyBits Z3_mk_bvredor l
+
 // And returns the bit-wise and of l and r.
 //
 // l and r must have the same size.
