@@ -53,6 +53,13 @@ func NewContext(cfg *Config) *Context {
 	runtime.SetFinalizer(ctx, func(ctx *Context) {
 		C.Z3_del_context(ctx.c)
 	})
+	// Disable the default error handler, which exits the program.
+	//
+	// TODO: It might simplify our own error handling to install a
+	// handler that does a Go panic. It looks like Z3's error
+	// handler logic might actually be designed to handle things
+	// like longjmp.
+	C.Z3_set_error_handler(ctx.c, nil)
 	return ctx
 }
 
@@ -83,6 +90,9 @@ func (ctx *Context) do(f func()) {
 	}
 	msg := C.Z3_get_error_msg_ex(ctx.c, ecode)
 	runtime.KeepAlive(ctx)
+	// TODO: Lift the Z3 errors to better Go errors. At least wrap
+	// the string in a type and consider using the error code to
+	// determine which of different error types to use.
 	panic(C.GoString(msg))
 }
 
