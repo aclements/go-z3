@@ -14,6 +14,8 @@ import (
 #cgo LDFLAGS: -lz3
 #include <z3.h>
 #include <stdlib.h>
+
+extern void goZ3ErrorHandler(Z3_context c, Z3_error_code e);
 */
 import "C"
 
@@ -38,6 +40,15 @@ type Context struct {
 	lock sync.Mutex
 }
 
+//export goZ3ErrorHandler
+func goZ3ErrorHandler(ctx C.Z3_context, e C.Z3_error_code) {
+	msg := C.Z3_get_error_msg_ex(ctx, e)
+	// TODO: Lift the Z3 errors to better Go errors. At least wrap
+	// the string in a type and consider using the error code to
+	// determine which of different error types to use.
+	panic(C.GoString(msg))
+}
+
 // NewContext returns a new Z3 context with the given configuration.
 //
 // If cfg is nil, the default configuration is used.
@@ -53,13 +64,12 @@ func NewContext(cfg *Config) *Context {
 	runtime.SetFinalizer(ctx, func(ctx *Context) {
 		C.Z3_del_context(ctx.c)
 	})
-	// Disable the default error handler, which exits the program.
-	//
-	// TODO: It might simplify our own error handling to install a
-	// handler that does a Go panic. It looks like Z3's error
-	// handler logic might actually be designed to handle things
-	// like longjmp.
-	C.Z3_set_error_handler(ctx.c, nil)
+	// Install an error handler that turns errors into Go panics.
+	// This error handler is equivalent to a longjmp on the C++
+	// side, but Z3 is actually designed to handle that, which is
+	// nice because it saves us the trouble of checking the
+	// context's error code all over the place.
+	C.Z3_set_error_handler(ctx.c, (*C.Z3_error_handler)(C.goZ3ErrorHandler))
 	return ctx
 }
 
@@ -72,8 +82,7 @@ func (ctx *Context) Interrupt() {
 	runtime.KeepAlive(ctx)
 }
 
-// do calls f with a per-context lock held and panics if the operation
-// produces an error code.
+// do calls f with a per-context lock held.
 //
 // Unfortunately, we can't just say that Contexts are not thread-safe
 // because we can't help but run finalizers asynchronously, which
@@ -83,17 +92,6 @@ func (ctx *Context) do(f func()) {
 	ctx.lock.Lock()
 	defer ctx.lock.Unlock()
 	f()
-	ecode := C.Z3_get_error_code(ctx.c)
-	if ecode == C.Z3_OK {
-		runtime.KeepAlive(ctx)
-		return
-	}
-	msg := C.Z3_get_error_msg_ex(ctx.c, ecode)
-	runtime.KeepAlive(ctx)
-	// TODO: Lift the Z3 errors to better Go errors. At least wrap
-	// the string in a type and consider using the error code to
-	// determine which of different error types to use.
-	panic(C.GoString(msg))
 }
 
 // symbol interns name as a Z3 symbol.
