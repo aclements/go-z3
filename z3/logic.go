@@ -25,11 +25,11 @@ func init() {
 
 // BoolSort returns the boolean sort.
 func (ctx *Context) BoolSort() Sort {
-	var csort C.Z3_sort
+	var sort Sort
 	ctx.do(func() {
-		csort = C.Z3_mk_bool_sort(ctx.c)
+		sort = wrapSort(ctx, C.Z3_mk_bool_sort(ctx.c), KindBool)
 	})
-	return wrapSort(ctx, csort, KindBool)
+	return sort
 }
 
 // FromBool returns a boolean value with value val.

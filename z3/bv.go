@@ -33,11 +33,11 @@ func init() {
 
 // BVSort returns a bit-vector sort of the given width in bits.
 func (ctx *Context) BVSort(bits int) Sort {
-	var csort C.Z3_sort
+	var sort Sort
 	ctx.do(func() {
-		csort = C.Z3_mk_bv_sort(ctx.c, C.unsigned(bits))
+		sort = wrapSort(ctx, C.Z3_mk_bv_sort(ctx.c, C.unsigned(bits)), KindBV)
 	})
-	return wrapSort(ctx, csort, KindBV)
+	return sort
 }
 
 // BVConst returns a bit-vector constant named "name" with the given

@@ -116,12 +116,12 @@ func (s *Solver) Check() (sat bool, err error) {
 // Model returns the model for the last Check. Model panics if Check
 // has not been called or the last Check did not return true.
 func (s *Solver) Model() *Model {
-	var cmodel C.Z3_model
+	var model *Model
 	s.ctx.do(func() {
-		cmodel = C.Z3_solver_get_model(s.ctx.c, s.c)
+		model = wrapModel(s.ctx, C.Z3_solver_get_model(s.ctx.c, s.c))
 	})
 	runtime.KeepAlive(s)
-	return wrapModel(s.ctx, cmodel)
+	return model
 }
 
 // String returns a string representation of s.

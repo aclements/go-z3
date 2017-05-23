@@ -33,11 +33,11 @@ type funcDeclImpl struct {
 	c   C.Z3_func_decl
 }
 
+// wrapFuncDecl wraps a C Z3_func_decl as a Go FuncDecl. This must be
+// called with the ctx.lock held.
 func wrapFuncDecl(ctx *Context, c C.Z3_func_decl) FuncDecl {
 	impl := &funcDeclImpl{ctx, c}
-	ctx.lock.Lock()
 	C.Z3_inc_ref(ctx.c, C.Z3_func_decl_to_ast(ctx.c, c))
-	ctx.lock.Unlock()
 	runtime.SetFinalizer(impl, func(impl *funcDeclImpl) {
 		impl.ctx.do(func() {
 			C.Z3_dec_ref(impl.ctx.c, C.Z3_func_decl_to_ast(impl.ctx.c, impl.c))
@@ -58,17 +58,17 @@ func (ctx *Context) FuncDecl(name string, domain []Sort, range_ Sort) FuncDecl {
 	for i, sort := range domain {
 		cdomain[i] = sort.c
 	}
-	var cfuncdecl C.Z3_func_decl
+	var funcdecl FuncDecl
 	ctx.do(func() {
 		var cdp *C.Z3_sort
 		if len(cdomain) > 0 {
 			cdp = &cdomain[0]
 		}
-		cfuncdecl = C.Z3_mk_func_decl(ctx.c, sym, C.uint(len(cdomain)), cdp, range_.c)
+		funcdecl = wrapFuncDecl(ctx, C.Z3_mk_func_decl(ctx.c, sym, C.uint(len(cdomain)), cdp, range_.c))
 	})
 	runtime.KeepAlive(domain)
 	runtime.KeepAlive(range_)
-	return wrapFuncDecl(ctx, cfuncdecl)
+	return funcdecl
 }
 
 // FreshFuncDecl creates a fresh uninterpreted function distinct from
@@ -80,17 +80,17 @@ func (ctx *Context) FreshFuncDecl(prefix string, domain []Sort, range_ Sort) Fun
 	for i, sort := range domain {
 		cdomain[i] = sort.c
 	}
-	var cfuncdecl C.Z3_func_decl
+	var funcdecl FuncDecl
 	ctx.do(func() {
 		var cdp *C.Z3_sort
 		if len(cdomain) > 0 {
 			cdp = &cdomain[0]
 		}
-		cfuncdecl = C.Z3_mk_fresh_func_decl(ctx.c, cprefix, C.uint(len(cdomain)), cdp, range_.c)
+		funcdecl = wrapFuncDecl(ctx, C.Z3_mk_fresh_func_decl(ctx.c, cprefix, C.uint(len(cdomain)), cdp, range_.c))
 	})
 	runtime.KeepAlive(domain)
 	runtime.KeepAlive(range_)
-	return wrapFuncDecl(ctx, cfuncdecl)
+	return funcdecl
 }
 
 // String returns a string representation of f.

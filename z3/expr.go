@@ -159,12 +159,12 @@ func (expr *valueImpl) AsAST() AST {
 
 // Sort returns expr's sort.
 func (expr *valueImpl) Sort() Sort {
-	var csort C.Z3_sort
+	var sort Sort
 	expr.ctx.do(func() {
-		csort = C.Z3_get_sort(expr.ctx.c, expr.c)
+		sort = wrapSort(expr.ctx, C.Z3_get_sort(expr.ctx.c, expr.c), KindUnknown)
 	})
 	runtime.KeepAlive(expr)
-	return wrapSort(expr.ctx, csort, KindUnknown)
+	return sort
 }
 
 func (expr *valueImpl) astKind() C.Z3_ast_kind {

@@ -141,8 +141,11 @@ func (ast AST) AsSort() Sort {
 	}
 	// Weirdly, Z3 doesn't provide an API for this. But these are
 	// all just casts.
-	csort := C.Z3_sort(unsafe.Pointer(ast.c))
-	sort := wrapSort(ast.ctx, csort, KindUnknown)
+	var sort Sort
+	ast.ctx.do(func() {
+		csort := C.Z3_sort(unsafe.Pointer(ast.c))
+		sort = wrapSort(ast.ctx, csort, KindUnknown)
+	})
 	runtime.KeepAlive(ast)
 	return sort
 }
@@ -155,11 +158,10 @@ func (ast AST) AsFuncDecl() FuncDecl {
 	if kind := ast.Kind(); kind != ASTKindFuncDecl {
 		panic("AST has kind " + kind.String() + ", not ASTKindFuncDecl")
 	}
-	var cfuncdecl C.Z3_func_decl
+	var funcdecl FuncDecl
 	ast.ctx.do(func() {
-		cfuncdecl = C.Z3_to_func_decl(ast.ctx.c, ast.c)
+		funcdecl = wrapFuncDecl(ast.ctx, C.Z3_to_func_decl(ast.ctx.c, ast.c))
 	})
-	funcdecl := wrapFuncDecl(ast.ctx, cfuncdecl)
 	runtime.KeepAlive(ast)
 	return funcdecl
 }

@@ -32,17 +32,14 @@ type sortImpl struct {
 	kind Kind
 }
 
+// wrapSort wraps a C Z3_sort as a Go Sort. This must be called with
+// the ctx.lock held.
 func wrapSort(ctx *Context, c C.Z3_sort, kind Kind) Sort {
+	C.Z3_inc_ref(ctx.c, C.Z3_sort_to_ast(ctx.c, c))
 	if kind == KindUnknown {
-		ctx.do(func() {
-			kind = Kind(C.Z3_get_sort_kind(ctx.c, c))
-		})
+		kind = Kind(C.Z3_get_sort_kind(ctx.c, c))
 	}
 	impl := &sortImpl{ctx, c, kind}
-	// TODO: This needs to be atomic with sort allocation.
-	ctx.lock.Lock()
-	C.Z3_inc_ref(ctx.c, C.Z3_sort_to_ast(ctx.c, c))
-	ctx.lock.Unlock()
 	runtime.SetFinalizer(impl, func(impl *sortImpl) {
 		impl.ctx.do(func() {
 			C.Z3_dec_ref(impl.ctx.c, C.Z3_sort_to_ast(impl.ctx.c, impl.c))

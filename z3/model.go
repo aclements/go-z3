@@ -24,11 +24,11 @@ type modelImpl struct {
 	c   C.Z3_model
 }
 
+// wrapModel wraps a C Z3_model as a Go Model. This must be called
+// with the ctx.lock held.
 func wrapModel(ctx *Context, c C.Z3_model) *Model {
 	impl := &modelImpl{ctx, c}
-	ctx.lock.Lock()
 	C.Z3_model_inc_ref(ctx.c, c)
-	ctx.lock.Unlock()
 	runtime.SetFinalizer(impl, func(impl *modelImpl) {
 		impl.ctx.do(func() {
 			C.Z3_model_dec_ref(impl.ctx.c, impl.c)

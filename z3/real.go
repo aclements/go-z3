@@ -30,11 +30,11 @@ func init() {
 
 // RealSort returns the real sort.
 func (ctx *Context) RealSort() Sort {
-	var csort C.Z3_sort
+	var sort Sort
 	ctx.do(func() {
-		csort = C.Z3_mk_real_sort(ctx.c)
+		sort = wrapSort(ctx, C.Z3_mk_real_sort(ctx.c), KindReal)
 	})
-	return wrapSort(ctx, csort, KindReal)
+	return sort
 }
 
 // RealConst returns a int constant named "name".

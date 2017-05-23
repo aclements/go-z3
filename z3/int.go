@@ -25,11 +25,11 @@ func init() {
 
 // IntSort returns the integer sort.
 func (ctx *Context) IntSort() Sort {
-	var csort C.Z3_sort
+	var sort Sort
 	ctx.do(func() {
-		csort = C.Z3_mk_int_sort(ctx.c)
+		sort = wrapSort(ctx, C.Z3_mk_int_sort(ctx.c), KindInt)
 	})
-	return wrapSort(ctx, csort, KindInt)
+	return sort
 }
 
 // IntConst returns a int constant named "name".
