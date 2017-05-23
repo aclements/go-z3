@@ -39,6 +39,7 @@ func wrapSort(ctx *Context, c C.Z3_sort, kind Kind) Sort {
 		})
 	}
 	impl := &sortImpl{ctx, c, kind}
+	// TODO: This needs to be atomic with sort allocation.
 	ctx.lock.Lock()
 	C.Z3_inc_ref(ctx.c, C.Z3_sort_to_ast(ctx.c, c))
 	ctx.lock.Unlock()
@@ -77,11 +78,10 @@ func (s Sort) BVSize() int {
 
 // AsAST returns the AST representation of s.
 func (s Sort) AsAST() AST {
-	var cast C.Z3_ast
+	var ast AST
 	s.ctx.do(func() {
-		cast = C.Z3_sort_to_ast(s.ctx.c, s.c)
+		ast = wrapAST(s.ctx, C.Z3_sort_to_ast(s.ctx.c, s.c))
 	})
-	ast := wrapAST(s.ctx, cast)
 	runtime.KeepAlive(s)
 	return ast
 }

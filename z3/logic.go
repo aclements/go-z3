@@ -34,15 +34,13 @@ func (ctx *Context) BoolSort() Sort {
 
 // FromBool returns a boolean value with value val.
 func (ctx *Context) FromBool(val bool) Bool {
-	var cexpr C.Z3_ast
-	ctx.do(func() {
+	return Bool(wrapValue(ctx, func() C.Z3_ast {
 		if val {
-			cexpr = C.Z3_mk_true(ctx.c)
+			return C.Z3_mk_true(ctx.c)
 		} else {
-			cexpr = C.Z3_mk_false(ctx.c)
+			return C.Z3_mk_false(ctx.c)
 		}
-	})
-	return Bool(wrapValue(ctx, cexpr))
+	}))
 }
 
 // BoolConst returns a boolean constant named "name".

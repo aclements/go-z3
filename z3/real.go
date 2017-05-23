@@ -47,12 +47,11 @@ func (ctx *Context) FromBigRat(val *big.Rat) Real {
 	cstr := C.CString(val.String())
 	defer C.free(unsafe.Pointer(cstr))
 	sort := ctx.RealSort()
-	var cexpr C.Z3_ast
-	ctx.do(func() {
-		cexpr = C.Z3_mk_numeral(ctx.c, cstr, sort.c)
+	sval := wrapValue(ctx, func() C.Z3_ast {
+		return C.Z3_mk_numeral(ctx.c, cstr, sort.c)
 	})
 	runtime.KeepAlive(sort)
-	return Real(wrapValue(ctx, cexpr))
+	return Real(sval)
 }
 
 // AsRat returns the value of lit as a numerator and denominator Int
@@ -65,15 +64,12 @@ func (lit Real) AsRat() (numer, denom Int, isLiteralRational bool) {
 		// so this gets all the cases we need.
 		return Int{}, Int{}, false
 	}
-	var cnumer, cdenom C.Z3_ast
-	lit.ctx.do(func() {
-		cnumer = C.Z3_get_numerator(lit.ctx.c, lit.c)
-	})
-	numer = Int(wrapValue(lit.ctx, cnumer))
-	lit.ctx.do(func() {
-		cdenom = C.Z3_get_denominator(lit.ctx.c, lit.c)
-	})
-	denom = Int(wrapValue(lit.ctx, cdenom))
+	numer = Int(wrapValue(lit.ctx, func() C.Z3_ast {
+		return C.Z3_get_numerator(lit.ctx.c, lit.c)
+	}))
+	denom = Int(wrapValue(lit.ctx, func() C.Z3_ast {
+		return C.Z3_get_denominator(lit.ctx.c, lit.c)
+	}))
 	runtime.KeepAlive(lit)
 	return numer, denom, true
 }
@@ -106,21 +102,12 @@ func (lit Real) Approx(precision int) (lower, upper Real, isLiteralIrrational bo
 	if !isAlgebraicNumber {
 		return Real{}, Real{}, false
 	}
-	var clower, cupper C.Z3_ast
-	lit.ctx.do(func() {
-		clower = C.Z3_get_algebraic_number_lower(lit.ctx.c, lit.c, C.unsigned(precision))
-	})
-	// TODO: If I do the get_algebraic_number_upper before
-	// wrapping the lower (presumably before incrementing its
-	// reference count), Z3 crashes when I try to use lower. This
-	// suggests creating the object and increasing its ref count
-	// have to be done atomically. The same thing happened in
-	// AsRat.
-	lower = Real(wrapValue(lit.ctx, clower))
-	lit.ctx.do(func() {
-		cupper = C.Z3_get_algebraic_number_upper(lit.ctx.c, lit.c, C.unsigned(precision))
-	})
-	upper = Real(wrapValue(lit.ctx, cupper))
+	lower = Real(wrapValue(lit.ctx, func() C.Z3_ast {
+		return C.Z3_get_algebraic_number_lower(lit.ctx.c, lit.c, C.unsigned(precision))
+	}))
+	upper = Real(wrapValue(lit.ctx, func() C.Z3_ast {
+		return C.Z3_get_algebraic_number_upper(lit.ctx.c, lit.c, C.unsigned(precision))
+	}))
 	runtime.KeepAlive(lit)
 	return lower, upper, true
 }

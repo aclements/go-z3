@@ -244,9 +244,8 @@ func genMethod(w *bytes.Buffer, dir *directive, label string) {
 	}
 
 	// Construct the AST.
-	fmt.Fprintf(w, " var cexpr C.Z3_ast\n")
-	fmt.Fprintf(w, " ctx.do(func() {\n")
-	fmt.Fprintf(w, "  cexpr = C.%s(ctx.c", dir.cFn)
+	fmt.Fprintf(w, " val := wrapValue(ctx, func() C.Z3_ast {\n")
+	fmt.Fprintf(w, "  return C.%s(ctx.c", dir.cFn)
 	if !dir.isDDD {
 		for _, a := range dir.cArgs {
 			fmt.Fprintf(w, ", %s", a.c(a.name))
@@ -269,12 +268,11 @@ func genMethod(w *bytes.Buffer, dir *directive, label string) {
 	}
 
 	// Wrap the final C result in a Go result.
-	expr := "wrapValue(ctx, cexpr)"
 	if dir.resType == "Value" {
 		// Determine the concrete type dynamically.
-		fmt.Fprintf(w, " return %s.lift(KindUnknown)", expr)
+		fmt.Fprintf(w, " return val.lift(KindUnknown)")
 	} else {
-		fmt.Fprintf(w, " return %s(%s)\n", dir.resType, expr)
+		fmt.Fprintf(w, " return %s(val)\n", dir.resType)
 	}
 	fmt.Fprintf(w, "}\n")
 	fmt.Fprintf(w, "\n")

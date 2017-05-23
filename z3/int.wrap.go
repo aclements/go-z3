@@ -14,13 +14,12 @@ import "C"
 // Eq returns a Value that is true if l and r are equal.
 func (l Int) Eq(r Int) Bool {
 	ctx := l.ctx
-	var cexpr C.Z3_ast
-	ctx.do(func() {
-		cexpr = C.Z3_mk_eq(ctx.c, l.c, r.c)
+	val := wrapValue(ctx, func() C.Z3_ast {
+		return C.Z3_mk_eq(ctx.c, l.c, r.c)
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return Bool(wrapValue(ctx, cexpr))
+	return Bool(val)
 }
 
 // NE returns a Value that is true if l and r are not equal.
@@ -37,13 +36,12 @@ func (l Int) NE(r Int) Bool {
 func (l Int) Div(r Int) Int {
 	// Generated from int.go:68.
 	ctx := l.ctx
-	var cexpr C.Z3_ast
-	ctx.do(func() {
-		cexpr = C.Z3_mk_div(ctx.c, l.c, r.c)
+	val := wrapValue(ctx, func() C.Z3_ast {
+		return C.Z3_mk_div(ctx.c, l.c, r.c)
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return Int(wrapValue(ctx, cexpr))
+	return Int(val)
 }
 
 // Mod returns modulus of l / r.
@@ -52,13 +50,12 @@ func (l Int) Div(r Int) Int {
 func (l Int) Mod(r Int) Int {
 	// Generated from int.go:74.
 	ctx := l.ctx
-	var cexpr C.Z3_ast
-	ctx.do(func() {
-		cexpr = C.Z3_mk_mod(ctx.c, l.c, r.c)
+	val := wrapValue(ctx, func() C.Z3_ast {
+		return C.Z3_mk_mod(ctx.c, l.c, r.c)
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return Int(wrapValue(ctx, cexpr))
+	return Int(val)
 }
 
 // Rem returns remainder of l / r.
@@ -67,37 +64,34 @@ func (l Int) Mod(r Int) Int {
 func (l Int) Rem(r Int) Int {
 	// Generated from int.go:80.
 	ctx := l.ctx
-	var cexpr C.Z3_ast
-	ctx.do(func() {
-		cexpr = C.Z3_mk_rem(ctx.c, l.c, r.c)
+	val := wrapValue(ctx, func() C.Z3_ast {
+		return C.Z3_mk_rem(ctx.c, l.c, r.c)
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return Int(wrapValue(ctx, cexpr))
+	return Int(val)
 }
 
 // ToReal converts l to sort Real.
 func (l Int) ToReal() Real {
 	// Generated from int.go:84.
 	ctx := l.ctx
-	var cexpr C.Z3_ast
-	ctx.do(func() {
-		cexpr = C.Z3_mk_int2real(ctx.c, l.c)
+	val := wrapValue(ctx, func() C.Z3_ast {
+		return C.Z3_mk_int2real(ctx.c, l.c)
 	})
 	runtime.KeepAlive(l)
-	return Real(wrapValue(ctx, cexpr))
+	return Real(val)
 }
 
 // ToBV converts l to a bit-vector of width bits.
 func (l Int) ToBV(bits int) BV {
 	// Generated from int.go:88.
 	ctx := l.ctx
-	var cexpr C.Z3_ast
-	ctx.do(func() {
-		cexpr = C.Z3_mk_int2bv(ctx.c, C.unsigned(bits), l.c)
+	val := wrapValue(ctx, func() C.Z3_ast {
+		return C.Z3_mk_int2bv(ctx.c, C.unsigned(bits), l.c)
 	})
 	runtime.KeepAlive(l)
-	return BV(wrapValue(ctx, cexpr))
+	return BV(val)
 }
 
 // Add returns the sum l + r[0] + r[1] + ...
@@ -109,12 +103,11 @@ func (l Int) Add(r ...Int) Int {
 	for i, arg := range r {
 		cargs[i+1] = arg.c
 	}
-	var cexpr C.Z3_ast
-	ctx.do(func() {
-		cexpr = C.Z3_mk_add(ctx.c, C.uint(len(cargs)), &cargs[0])
+	val := wrapValue(ctx, func() C.Z3_ast {
+		return C.Z3_mk_add(ctx.c, C.uint(len(cargs)), &cargs[0])
 	})
 	runtime.KeepAlive(&cargs[0])
-	return Int(wrapValue(ctx, cexpr))
+	return Int(val)
 }
 
 // Mul returns the product l * r[0] * r[1] * ...
@@ -126,12 +119,11 @@ func (l Int) Mul(r ...Int) Int {
 	for i, arg := range r {
 		cargs[i+1] = arg.c
 	}
-	var cexpr C.Z3_ast
-	ctx.do(func() {
-		cexpr = C.Z3_mk_mul(ctx.c, C.uint(len(cargs)), &cargs[0])
+	val := wrapValue(ctx, func() C.Z3_ast {
+		return C.Z3_mk_mul(ctx.c, C.uint(len(cargs)), &cargs[0])
 	})
 	runtime.KeepAlive(&cargs[0])
-	return Int(wrapValue(ctx, cexpr))
+	return Int(val)
 }
 
 // Sub returns l - r[0] - r[1] - ...
@@ -143,87 +135,80 @@ func (l Int) Sub(r ...Int) Int {
 	for i, arg := range r {
 		cargs[i+1] = arg.c
 	}
-	var cexpr C.Z3_ast
-	ctx.do(func() {
-		cexpr = C.Z3_mk_sub(ctx.c, C.uint(len(cargs)), &cargs[0])
+	val := wrapValue(ctx, func() C.Z3_ast {
+		return C.Z3_mk_sub(ctx.c, C.uint(len(cargs)), &cargs[0])
 	})
 	runtime.KeepAlive(&cargs[0])
-	return Int(wrapValue(ctx, cexpr))
+	return Int(val)
 }
 
 // Neg returns -l.
 func (l Int) Neg() Int {
 	// Generated from intreal.go:24.
 	ctx := l.ctx
-	var cexpr C.Z3_ast
-	ctx.do(func() {
-		cexpr = C.Z3_mk_unary_minus(ctx.c, l.c)
+	val := wrapValue(ctx, func() C.Z3_ast {
+		return C.Z3_mk_unary_minus(ctx.c, l.c)
 	})
 	runtime.KeepAlive(l)
-	return Int(wrapValue(ctx, cexpr))
+	return Int(val)
 }
 
 // Exp returns lᶠ.
 func (l Int) Exp(r Int) Int {
 	// Generated from intreal.go:28.
 	ctx := l.ctx
-	var cexpr C.Z3_ast
-	ctx.do(func() {
-		cexpr = C.Z3_mk_power(ctx.c, l.c, r.c)
+	val := wrapValue(ctx, func() C.Z3_ast {
+		return C.Z3_mk_power(ctx.c, l.c, r.c)
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return Int(wrapValue(ctx, cexpr))
+	return Int(val)
 }
 
 // LT returns l < r.
 func (l Int) LT(r Int) Int {
 	// Generated from intreal.go:32.
 	ctx := l.ctx
-	var cexpr C.Z3_ast
-	ctx.do(func() {
-		cexpr = C.Z3_mk_lt(ctx.c, l.c, r.c)
+	val := wrapValue(ctx, func() C.Z3_ast {
+		return C.Z3_mk_lt(ctx.c, l.c, r.c)
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return Int(wrapValue(ctx, cexpr))
+	return Int(val)
 }
 
 // LE returns l <= r.
 func (l Int) LE(r Int) Int {
 	// Generated from intreal.go:36.
 	ctx := l.ctx
-	var cexpr C.Z3_ast
-	ctx.do(func() {
-		cexpr = C.Z3_mk_le(ctx.c, l.c, r.c)
+	val := wrapValue(ctx, func() C.Z3_ast {
+		return C.Z3_mk_le(ctx.c, l.c, r.c)
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return Int(wrapValue(ctx, cexpr))
+	return Int(val)
 }
 
 // GT returns l > r.
 func (l Int) GT(r Int) Int {
 	// Generated from intreal.go:40.
 	ctx := l.ctx
-	var cexpr C.Z3_ast
-	ctx.do(func() {
-		cexpr = C.Z3_mk_gt(ctx.c, l.c, r.c)
+	val := wrapValue(ctx, func() C.Z3_ast {
+		return C.Z3_mk_gt(ctx.c, l.c, r.c)
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return Int(wrapValue(ctx, cexpr))
+	return Int(val)
 }
 
 // GE returns l >= r.
 func (l Int) GE(r Int) Int {
 	// Generated from intreal.go:44.
 	ctx := l.ctx
-	var cexpr C.Z3_ast
-	ctx.do(func() {
-		cexpr = C.Z3_mk_ge(ctx.c, l.c, r.c)
+	val := wrapValue(ctx, func() C.Z3_ast {
+		return C.Z3_mk_ge(ctx.c, l.c, r.c)
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return Int(wrapValue(ctx, cexpr))
+	return Int(val)
 }

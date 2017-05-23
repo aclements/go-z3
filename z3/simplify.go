@@ -23,9 +23,7 @@ type futureParams struct{}
 //
 // The resulting expression will have the same sort as x.
 func (ctx *Context) Simplify(x Value, _ *futureParams) Value {
-	var cexpr C.Z3_ast
-	ctx.do(func() {
-		cexpr = C.Z3_simplify(ctx.c, x.impl().c)
-	})
-	return wrapValue(ctx, cexpr).lift(KindUnknown)
+	return wrapValue(ctx, func() C.Z3_ast {
+		return C.Z3_simplify(ctx.c, x.impl().c)
+	}).lift(KindUnknown)
 }

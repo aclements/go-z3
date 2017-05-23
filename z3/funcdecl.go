@@ -105,12 +105,12 @@ func (f FuncDecl) String() string {
 
 // AsAST returns the AST representation of f.
 func (f FuncDecl) AsAST() AST {
-	var cast C.Z3_ast
+	var ast AST
 	f.ctx.do(func() {
-		cast = C.Z3_func_decl_to_ast(f.ctx.c, f.c)
+		ast = wrapAST(f.ctx, C.Z3_func_decl_to_ast(f.ctx.c, f.c))
 	})
 	runtime.KeepAlive(f)
-	return wrapAST(f.ctx, cast)
+	return ast
 }
 
 // Apply creates a Value representing the result of applying f to
@@ -123,16 +123,16 @@ func (f FuncDecl) Apply(args ...Value) Value {
 	for i, arg := range args {
 		cargs[i] = arg.impl().c
 	}
-	var cexpr C.Z3_ast
-	f.ctx.do(func() {
+	val := wrapValue(f.ctx, func() C.Z3_ast {
 		var cap *C.Z3_ast
 		if len(cargs) > 0 {
 			cap = &cargs[0]
 		}
-		cexpr = C.Z3_mk_app(f.ctx.c, f.c, C.uint(len(cargs)), cap)
+		return C.Z3_mk_app(f.ctx.c, f.c, C.uint(len(cargs)), cap)
 	})
+	runtime.KeepAlive(f)
 	runtime.KeepAlive(cargs)
-	return wrapValue(f.ctx, cexpr).lift(KindUnknown)
+	return val.lift(KindUnknown)
 }
 
 // TODO: Lots of accessors

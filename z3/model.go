@@ -48,17 +48,21 @@ func wrapModel(ctx *Context, c C.Z3_model) *Model {
 // contains a quantifier or is type-incorrect, or if m is a partial
 // model (that is, the option MODEL_PARTIAL was set to true).
 func (m *Model) Eval(val Value, completion bool) Value {
-	var out C.Z3_ast
 	var ok bool
+	var ast AST
 	m.ctx.do(func() {
-		ok = z3ToBool(C.Z3_model_eval(m.ctx.c, m.c, val.impl().c, boolToZ3(completion), &out))
+		var cast C.Z3_ast
+		ok = z3ToBool(C.Z3_model_eval(m.ctx.c, m.c, val.impl().c, boolToZ3(completion), &cast))
+		if ok {
+			ast = wrapAST(m.ctx, cast)
+		}
 	})
 	runtime.KeepAlive(m)
 	runtime.KeepAlive(val)
 	if !ok {
 		return nil
 	}
-	return wrapValue(m.ctx, out).lift(KindUnknown)
+	return ast.AsValue()
 }
 
 // String returns a string representation of m.

@@ -26,6 +26,8 @@ type astImpl struct {
 	c   C.Z3_ast
 }
 
+// wrapAST wraps a C Z3_ast as a Go AST. This must be called with the
+// ctx.lock held.
 func wrapAST(ctx *Context, c C.Z3_ast) AST {
 	impl := &astImpl{ctx, c}
 	// Note that, even if c was just returned by an allocation
@@ -35,9 +37,11 @@ func wrapAST(ctx *Context, c C.Z3_ast) AST {
 	// we've already wrapped it, and the reference count will
 	// protect the underlying object no matter what happens to the
 	// Go wrappers.
-	ctx.lock.Lock()
+	//
+	// This must be done atomically with the allocating function.
+	// If we allocate two objects without incrementing the
+	// refcount on the first, Z3 will reclaim the first object!
 	C.Z3_inc_ref(ctx.c, c)
-	ctx.lock.Unlock()
 	runtime.SetFinalizer(impl, func(impl *astImpl) {
 		impl.ctx.do(func() {
 			C.Z3_dec_ref(impl.ctx.c, impl.c)
@@ -96,12 +100,12 @@ func (ast AST) ID() uint64 {
 
 // Translate copies ast into the target Context.
 func (ast AST) Translate(target *Context) AST {
-	var res C.Z3_ast
+	var res AST
 	target.do(func() {
-		res = C.Z3_translate(ast.ctx.c, ast.c, target.c)
+		res = wrapAST(target, C.Z3_translate(ast.ctx.c, ast.c, target.c))
 	})
 	runtime.KeepAlive(ast)
-	return wrapAST(target, res)
+	return res
 }
 
 // Kind returns ast's kind.

@@ -66,8 +66,13 @@ type value struct {
 
 type valueImpl astImpl
 
-func wrapValue(ctx *Context, c C.Z3_ast) value {
-	return value{(*valueImpl)(wrapAST(ctx, c).astImpl), noEq{}}
+func wrapValue(ctx *Context, ctor func() C.Z3_ast) value {
+	var val value
+	ctx.do(func() {
+		cast := ctor()
+		val = value{(*valueImpl)(wrapAST(ctx, cast).astImpl), noEq{}}
+	})
+	return val
 }
 
 // lift wraps x in the appropriate Value type. kind must be x's kind if
@@ -88,12 +93,11 @@ func (x value) lift(kind Kind) Value {
 // name.
 func (ctx *Context) Const(name string, sort Sort) Value {
 	sym := ctx.symbol(name)
-	var cexpr C.Z3_ast
-	ctx.do(func() {
-		cexpr = C.Z3_mk_const(ctx.c, sym, sort.c)
+	val := wrapValue(ctx, func() C.Z3_ast {
+		return C.Z3_mk_const(ctx.c, sym, sort.c)
 	})
 	runtime.KeepAlive(sort)
-	return wrapValue(ctx, cexpr).lift(sort.Kind())
+	return val.lift(sort.Kind())
 }
 
 // FreshConst returns a constant that is distinct from all other
@@ -101,12 +105,11 @@ func (ctx *Context) Const(name string, sort Sort) Value {
 func (ctx *Context) FreshConst(prefix string, sort Sort) Value {
 	cprefix := C.CString(prefix)
 	defer C.free(unsafe.Pointer(cprefix))
-	var cexpr C.Z3_ast
-	ctx.do(func() {
-		cexpr = C.Z3_mk_fresh_const(ctx.c, cprefix, sort.c)
+	val := wrapValue(ctx, func() C.Z3_ast {
+		return C.Z3_mk_fresh_const(ctx.c, cprefix, sort.c)
 	})
 	runtime.KeepAlive(sort)
-	return wrapValue(ctx, cexpr).lift(sort.Kind())
+	return val.lift(sort.Kind())
 }
 
 // FromBigInt returns a literal whose value is val. sort must have
@@ -114,25 +117,23 @@ func (ctx *Context) FreshConst(prefix string, sort Sort) Value {
 func (ctx *Context) FromBigInt(val *big.Int, sort Sort) Value {
 	cstr := C.CString(val.Text(10))
 	defer C.free(unsafe.Pointer(cstr))
-	var cexpr C.Z3_ast
-	ctx.do(func() {
-		cexpr = C.Z3_mk_numeral(ctx.c, cstr, sort.c)
+	sval := wrapValue(ctx, func() C.Z3_ast {
+		return C.Z3_mk_numeral(ctx.c, cstr, sort.c)
 	})
 	runtime.KeepAlive(sort)
-	return wrapValue(ctx, cexpr).lift(sort.Kind())
+	return sval.lift(sort.Kind())
 }
 
 // FromInt returns a literal whose value is val. sort must have kind
 // int, real, finite-domain, or bit-vector.
 func (ctx *Context) FromInt(val int64, sort Sort) Value {
-	var cexpr C.Z3_ast
-	ctx.do(func() {
+	sval := wrapValue(ctx, func() C.Z3_ast {
 		// Z3_mk_int64 doesn't say real sorts are accepted,
 		// but the C++ bindings use it for reals.
-		cexpr = C.Z3_mk_int64(ctx.c, C.__int64(val), sort.c)
+		return C.Z3_mk_int64(ctx.c, C.__int64(val), sort.c)
 	})
 	runtime.KeepAlive(sort)
-	return wrapValue(ctx, cexpr).lift(sort.Kind())
+	return sval.lift(sort.Kind())
 }
 
 func (expr *valueImpl) impl() *valueImpl {

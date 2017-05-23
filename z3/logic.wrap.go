@@ -14,13 +14,12 @@ import "C"
 // Eq returns a Value that is true if l and r are equal.
 func (l Bool) Eq(r Bool) Bool {
 	ctx := l.ctx
-	var cexpr C.Z3_ast
-	ctx.do(func() {
-		cexpr = C.Z3_mk_eq(ctx.c, l.c, r.c)
+	val := wrapValue(ctx, func() C.Z3_ast {
+		return C.Z3_mk_eq(ctx.c, l.c, r.c)
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return Bool(wrapValue(ctx, cexpr))
+	return Bool(val)
 }
 
 // NE returns a Value that is true if l and r are not equal.
@@ -32,29 +31,27 @@ func (l Bool) NE(r Bool) Bool {
 //
 // All Values must have the same sort.
 func (ctx *Context) Distinct(vals ...Value) Bool {
-	// Generated from logic.go:70.
+	// Generated from logic.go:69.
 	cargs := make([]C.Z3_ast, len(vals)+0)
 	for i, arg := range vals {
 		cargs[i+0] = arg.impl().c
 	}
-	var cexpr C.Z3_ast
-	ctx.do(func() {
-		cexpr = C.Z3_mk_distinct(ctx.c, C.uint(len(cargs)), &cargs[0])
+	val := wrapValue(ctx, func() C.Z3_ast {
+		return C.Z3_mk_distinct(ctx.c, C.uint(len(cargs)), &cargs[0])
 	})
 	runtime.KeepAlive(&cargs[0])
-	return Bool(wrapValue(ctx, cexpr))
+	return Bool(val)
 }
 
 // Not returns the boolean negation of l.
 func (l Bool) Not() Bool {
-	// Generated from logic.go:74.
+	// Generated from logic.go:73.
 	ctx := l.ctx
-	var cexpr C.Z3_ast
-	ctx.do(func() {
-		cexpr = C.Z3_mk_not(ctx.c, l.c)
+	val := wrapValue(ctx, func() C.Z3_ast {
+		return C.Z3_mk_not(ctx.c, l.c)
 	})
 	runtime.KeepAlive(l)
-	return Bool(wrapValue(ctx, cexpr))
+	return Bool(val)
 }
 
 // IfThenElse returns a Value equal to cons if cond is true, otherwise
@@ -63,88 +60,82 @@ func (l Bool) Not() Bool {
 // cons and alt must have the same sort. The result will have the same
 // sort as cons and alt.
 func (cond Bool) IfThenElse(cons Value, alt Value) Value {
-	// Generated from logic.go:82.
+	// Generated from logic.go:81.
 	ctx := cond.ctx
-	var cexpr C.Z3_ast
-	ctx.do(func() {
-		cexpr = C.Z3_mk_ite(ctx.c, cond.c, cons.impl().c, alt.impl().c)
+	val := wrapValue(ctx, func() C.Z3_ast {
+		return C.Z3_mk_ite(ctx.c, cond.c, cons.impl().c, alt.impl().c)
 	})
 	runtime.KeepAlive(cond)
 	runtime.KeepAlive(cons)
 	runtime.KeepAlive(alt)
-	return wrapValue(ctx, cexpr).lift(KindUnknown)
+	return val.lift(KindUnknown)
 }
 
 // Iff returns a Value that is true if l and r are equal (l
 // if-and-only-if r).
 func (l Bool) Iff(r Bool) Bool {
-	// Generated from logic.go:87.
+	// Generated from logic.go:86.
 	ctx := l.ctx
-	var cexpr C.Z3_ast
-	ctx.do(func() {
-		cexpr = C.Z3_mk_iff(ctx.c, l.c, r.c)
+	val := wrapValue(ctx, func() C.Z3_ast {
+		return C.Z3_mk_iff(ctx.c, l.c, r.c)
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return Bool(wrapValue(ctx, cexpr))
+	return Bool(val)
 }
 
 // Implies returns a Value that is true if l implies r.
 func (l Bool) Implies(r Bool) Bool {
-	// Generated from logic.go:91.
+	// Generated from logic.go:90.
 	ctx := l.ctx
-	var cexpr C.Z3_ast
-	ctx.do(func() {
-		cexpr = C.Z3_mk_implies(ctx.c, l.c, r.c)
+	val := wrapValue(ctx, func() C.Z3_ast {
+		return C.Z3_mk_implies(ctx.c, l.c, r.c)
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return Bool(wrapValue(ctx, cexpr))
+	return Bool(val)
 }
 
 // Xor returns a Value that is true if l xor r.
 func (l Bool) Xor(r Bool) Bool {
-	// Generated from logic.go:95.
+	// Generated from logic.go:94.
 	ctx := l.ctx
-	var cexpr C.Z3_ast
-	ctx.do(func() {
-		cexpr = C.Z3_mk_xor(ctx.c, l.c, r.c)
+	val := wrapValue(ctx, func() C.Z3_ast {
+		return C.Z3_mk_xor(ctx.c, l.c, r.c)
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return Bool(wrapValue(ctx, cexpr))
+	return Bool(val)
 }
 
 // And returns a Value that is true if l and all arguments are true.
 func (l Bool) And(r ...Bool) Bool {
-	// Generated from logic.go:99.
+	// Generated from logic.go:98.
 	ctx := l.ctx
 	cargs := make([]C.Z3_ast, len(r)+1)
 	cargs[0] = l.c
 	for i, arg := range r {
 		cargs[i+1] = arg.c
 	}
-	var cexpr C.Z3_ast
-	ctx.do(func() {
-		cexpr = C.Z3_mk_and(ctx.c, C.uint(len(cargs)), &cargs[0])
+	val := wrapValue(ctx, func() C.Z3_ast {
+		return C.Z3_mk_and(ctx.c, C.uint(len(cargs)), &cargs[0])
 	})
 	runtime.KeepAlive(&cargs[0])
-	return Bool(wrapValue(ctx, cexpr))
+	return Bool(val)
 }
 
 // Or returns a Value that is true if l or any argument is true.
 func (l Bool) Or(r ...Bool) Bool {
-	// Generated from logic.go:103.
+	// Generated from logic.go:102.
 	ctx := l.ctx
 	cargs := make([]C.Z3_ast, len(r)+1)
 	cargs[0] = l.c
 	for i, arg := range r {
 		cargs[i+1] = arg.c
 	}
-	var cexpr C.Z3_ast
-	ctx.do(func() {
-		cexpr = C.Z3_mk_or(ctx.c, C.uint(len(cargs)), &cargs[0])
+	val := wrapValue(ctx, func() C.Z3_ast {
+		return C.Z3_mk_or(ctx.c, C.uint(len(cargs)), &cargs[0])
 	})
 	runtime.KeepAlive(&cargs[0])
-	return Bool(wrapValue(ctx, cexpr))
+	return Bool(val)
 }
