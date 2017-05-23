@@ -38,6 +38,9 @@ type Value interface {
 	// Sort returns this value's sort.
 	Sort() Sort
 
+	// Context returns the Context that created this Value.
+	Context() *Context
+
 	// String returns an S-expression representation of this value.
 	String() string
 
@@ -138,6 +141,14 @@ func (ctx *Context) FromInt(val int64, sort Sort) Value {
 
 func (expr *valueImpl) impl() *valueImpl {
 	return expr
+}
+
+// Context returns the Context that created expr.
+func (expr *valueImpl) Context() *Context {
+	if expr == nil {
+		return nil
+	}
+	return expr.ctx
 }
 
 // String returns a string representation of expr.

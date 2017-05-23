@@ -48,6 +48,14 @@ func wrapSort(ctx *Context, c C.Z3_sort, kind Kind) Sort {
 	return Sort{impl, noEq{}}
 }
 
+// Context returns the Context that created sort.
+func (s Sort) Context() *Context {
+	if s.sortImpl == nil {
+		return nil
+	}
+	return s.ctx
+}
+
 // String returns a string representation of s.
 func (s Sort) String() string {
 	var res string

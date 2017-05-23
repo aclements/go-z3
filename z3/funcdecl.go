@@ -93,6 +93,14 @@ func (ctx *Context) FreshFuncDecl(prefix string, domain []Sort, range_ Sort) Fun
 	return funcdecl
 }
 
+// Context returns the Context that created f.
+func (f FuncDecl) Context() *Context {
+	if f.funcDeclImpl == nil {
+		return nil
+	}
+	return f.ctx
+}
+
 // String returns a string representation of f.
 func (f FuncDecl) String() string {
 	var res string

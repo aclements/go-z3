@@ -50,6 +50,14 @@ func wrapAST(ctx *Context, c C.Z3_ast) AST {
 	return AST{impl, noEq{}}
 }
 
+// Context returns the Context that created ast.
+func (ast AST) Context() *Context {
+	if ast.astImpl == nil {
+		return nil
+	}
+	return ast.ctx
+}
+
 // Equal returns true if ast and o are identical ASTs.
 func (ast AST) Equal(o AST) bool {
 	// Sadly, while AST equality is just pointer equality on the
