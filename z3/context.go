@@ -34,6 +34,8 @@ type Context struct {
 
 	syms map[string]C.Z3_symbol
 
+	extra map[interface{}]interface{}
+
 	// lock protects AST reference counts and the context's last
 	// error. Use Context.do to acquire this around a Z3 operation
 	// and panic if the operation has an error status.
@@ -59,6 +61,7 @@ func NewContext(cfg *Config) *Context {
 	ctx := &Context{
 		C.Z3_mk_context_rc(cfg.c),
 		make(map[string]C.Z3_symbol),
+		nil,
 		sync.Mutex{},
 	}
 	runtime.SetFinalizer(ctx, func(ctx *Context) {
@@ -80,6 +83,32 @@ func NewContext(cfg *Config) *Context {
 func (ctx *Context) Interrupt() {
 	C.Z3_interrupt(ctx.c)
 	runtime.KeepAlive(ctx)
+}
+
+// Extra returns the "extra" data associated with key, or nil if there
+// is no data associated with key.
+func (ctx *Context) Extra(key interface{}) interface{} {
+	ctx.lock.Lock()
+	defer ctx.lock.Unlock()
+	return ctx.extra[key]
+}
+
+// SetExtra associates key with value in ctx's "extra" data. This can
+// be used by other packages to associate other data with ctx, such as
+// caches. key must support comparison.
+func (ctx *Context) SetExtra(key, value interface{}) {
+	ctx.lock.Lock()
+	defer ctx.lock.Unlock()
+	if value == nil {
+		if ctx.extra != nil {
+			delete(ctx.extra, key)
+		}
+	} else {
+		if ctx.extra == nil {
+			ctx.extra = make(map[interface{}]interface{})
+		}
+		ctx.extra[key] = value
+	}
 }
 
 // do calls f with a per-context lock held.
