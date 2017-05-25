@@ -166,7 +166,7 @@ func (l Int) Exp(r Int) Int {
 }
 
 // LT returns l < r.
-func (l Int) LT(r Int) Int {
+func (l Int) LT(r Int) Bool {
 	// Generated from intreal.go:32.
 	ctx := l.ctx
 	val := wrapValue(ctx, func() C.Z3_ast {
@@ -174,11 +174,11 @@ func (l Int) LT(r Int) Int {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return Int(val)
+	return Bool(val)
 }
 
 // LE returns l <= r.
-func (l Int) LE(r Int) Int {
+func (l Int) LE(r Int) Bool {
 	// Generated from intreal.go:36.
 	ctx := l.ctx
 	val := wrapValue(ctx, func() C.Z3_ast {
@@ -186,11 +186,11 @@ func (l Int) LE(r Int) Int {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return Int(val)
+	return Bool(val)
 }
 
 // GT returns l > r.
-func (l Int) GT(r Int) Int {
+func (l Int) GT(r Int) Bool {
 	// Generated from intreal.go:40.
 	ctx := l.ctx
 	val := wrapValue(ctx, func() C.Z3_ast {
@@ -198,11 +198,11 @@ func (l Int) GT(r Int) Int {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return Int(val)
+	return Bool(val)
 }
 
 // GE returns l >= r.
-func (l Int) GE(r Int) Int {
+func (l Int) GE(r Int) Bool {
 	// Generated from intreal.go:44.
 	ctx := l.ctx
 	val := wrapValue(ctx, func() C.Z3_ast {
@@ -210,5 +210,5 @@ func (l Int) GE(r Int) Int {
 	})
 	runtime.KeepAlive(l)
 	runtime.KeepAlive(r)
-	return Int(val)
+	return Bool(val)
 }

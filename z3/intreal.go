@@ -29,16 +29,16 @@ package z3
 
 // LT returns l < r.
 //
-//wrap:expr LT Z3_mk_lt l r
+//wrap:expr LT:Bool Z3_mk_lt l r
 
 // LE returns l <= r.
 //
-//wrap:expr LE Z3_mk_le l r
+//wrap:expr LE:Bool Z3_mk_le l r
 
 // GT returns l > r.
 //
-//wrap:expr GT Z3_mk_gt l r
+//wrap:expr GT:Bool Z3_mk_gt l r
 
 // GE returns l >= r.
 //
-//wrap:expr GE Z3_mk_ge l r
+//wrap:expr GE:Bool Z3_mk_ge l r
