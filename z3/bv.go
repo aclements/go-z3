@@ -184,13 +184,18 @@ func (lit BV) AsUint64() (val uint64, isLiteral, ok bool) {
 //
 //wrap:expr Mul Z3_mk_bvmul l r
 
-// UDiv returns the unsigned quotient of l divided by r.
+// UDiv returns the floor of l / r, treating l and r as unsigned.
+//
+// If r is 0, the result is unconstrained.
 //
 // l and r must have the same size.
 //
 //wrap:expr UDiv Z3_mk_bvudiv l r
 
-// SDiv returns the two's complement signed quotient of l divided by r.
+// SDiv returns l / r rounded toward 0, treating l and r as two's
+// complement signed numbers.
+//
+// If r is 0, the result is unconstrained.
 //
 // l and r must have the same size.
 //

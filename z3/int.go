@@ -77,6 +77,9 @@ func (lit Int) AsBigInt() (val *big.Int, isConst bool) {
 //
 // The sign of the result follows the sign of l.
 //
+// Note that this differs subtly from Go's remainder operator because
+// this is based floored division rather than truncated division.
+//
 //wrap:expr Rem Z3_mk_rem l r
 
 // ToReal converts l to sort Real.
