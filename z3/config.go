@@ -4,65 +4,100 @@
 
 package z3
 
-import (
-	"runtime"
-	"strconv"
-	"unsafe"
-)
-
 /*
 #cgo LDFLAGS: -lz3
 #include <z3.h>
-#include <stdlib.h>
 */
 import "C"
 
+// Config stores a set of configuration parameters. Configs are used
+// to configure many different objects in Z3.
 type Config struct {
-	c C.Z3_config
-	noEq
+	m   map[string]interface{}
+	set func(name string, value interface{})
 }
 
-// TODO: Z3 has a lot of configuration things. It has a global
-// configuration, a pre-context configuration, context configuration,
-// and Z3_params. Maybe we unify them? Maybe these should just be
-// maps?
-
-// NewConfig returns a new configuration for creating contexts.
-//
-// The params argument provides initial configuration settings. It
-// must alternate between configuration key and value.
-//
-// See Z3_mk_config documentation for accepted configuration settings.
-func NewConfig(params ...string) *Config {
-	if len(params)%2 != 0 {
-		panic("len(params) must be even")
-	}
-	c := &Config{C.Z3_mk_config(), noEq{}}
-	runtime.SetFinalizer(c, func(c *Config) {
-		C.Z3_del_config(c.c)
-	})
-	for i := 0; i < len(params); i += 2 {
-		c.Set(params[i], params[i+1])
-	}
-	return c
+type param struct {
+	name, typ, description string
 }
 
-func (c *Config) Set(name, value string) {
-	cname, cvalue := C.CString(name), C.CString(value)
-	defer C.free(unsafe.Pointer(cname))
-	defer C.free(unsafe.Pointer(cvalue))
-	C.Z3_set_param_value(c.c, cname, cvalue)
-	runtime.KeepAlive(c)
+func newConfig(desc []param) *Config {
+	// TODO: API to access the parameter descriptions.
+	return &Config{m: make(map[string]interface{})}
 }
 
-func (c *Config) SetBool(name string, value bool) {
-	if value {
-		c.Set(name, "true")
+func (p *Config) SetBool(name string, value bool) *Config {
+	if p.set != nil {
+		p.set(name, value)
 	} else {
-		c.Set(name, "false")
+		p.m[name] = value
 	}
+	return p
 }
 
-func (c *Config) SetInt(name string, value int) {
-	c.Set(name, strconv.Itoa(value))
+func (p *Config) SetString(name, value string) *Config {
+	if p.set != nil {
+		p.set(name, value)
+	} else {
+		p.m[name] = value
+	}
+	return p
+}
+
+func (p *Config) SetUint(name string, value uint) *Config {
+	if p.set != nil {
+		p.set(name, value)
+	} else {
+		p.m[name] = value
+	}
+	return p
+}
+
+func (p *Config) SetFloat(name string, value float64) *Config {
+	if p.set != nil {
+		p.set(name, value)
+	} else {
+		p.m[name] = value
+	}
+	return p
+}
+
+func (p *Config) toC(ctx *Context) C.Z3_params {
+	var c C.Z3_params
+	ctx.do(func() {
+		c = C.Z3_mk_params(ctx.c)
+		C.Z3_params_inc_ref(ctx.c, c)
+	})
+	ok := false
+	defer func() {
+		if !ok {
+			C.Z3_params_dec_ref(ctx.c, c)
+		}
+	}()
+	for k, v := range p.m {
+		ck := ctx.symbol(k)
+		switch v := v.(type) {
+		case bool:
+			ctx.do(func() {
+				C.Z3_params_set_bool(ctx.c, c, ck, boolToZ3(v))
+			})
+		case string:
+			cv := ctx.symbol(v)
+			ctx.do(func() {
+				C.Z3_params_set_symbol(ctx.c, c, ck, cv)
+			})
+		case uint:
+			ctx.do(func() {
+				C.Z3_params_set_uint(ctx.c, c, ck, C.unsigned(v))
+			})
+		case float64:
+			ctx.do(func() {
+				C.Z3_params_set_double(ctx.c, c, ck, C.double(v))
+			})
+		default:
+			panic("bad param type")
+		}
+	}
+	ok = true
+	return c
 }

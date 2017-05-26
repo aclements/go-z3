@@ -5,6 +5,7 @@
 package z3
 
 import (
+	"fmt"
 	"runtime"
 	"sync"
 	"unsafe"
@@ -53,13 +54,23 @@ func goZ3ErrorHandler(ctx C.Z3_context, e C.Z3_error_code) {
 
 // NewContext returns a new Z3 context with the given configuration.
 //
-// If cfg is nil, the default configuration is used.
-func NewContext(cfg *Config) *Context {
-	if cfg == nil {
-		cfg = NewConfig()
+// The config argument must have been created with NewContextConfig.
+// If config is nil, the default configuration is used.
+func NewContext(config *Config) *Context {
+	// Construct the Z3_config.
+	cfg := C.Z3_mk_config()
+	defer C.Z3_del_config(cfg)
+	if config != nil {
+		for key, val := range config.m {
+			ckey, cval := C.CString(key), C.CString(fmt.Sprint(val))
+			defer C.free(unsafe.Pointer(ckey))
+			defer C.free(unsafe.Pointer(cval))
+			C.Z3_set_param_value(cfg, ckey, cval)
+		}
 	}
+	// Construct the Z3_context.
 	ctx := &Context{
-		C.Z3_mk_context_rc(cfg.c),
+		C.Z3_mk_context_rc(cfg),
 		make(map[string]C.Z3_symbol),
 		nil,
 		sync.Mutex{},
@@ -76,7 +87,55 @@ func NewContext(cfg *Config) *Context {
 	return ctx
 }
 
-// TODO: Z3_update_param_value
+// NewContextConfig returns *Config for configuring a new Context.
+//
+// The following are commonly useful parameters:
+//
+//	timeout           uint    Timeout in milliseconds used for solvers (default: ∞)
+//	auto_config       bool    Use heuristics to automatically select solver and configure it (default: true)
+//	proof             bool    Enable proof generation (default: false)
+//	model             bool    Enable model generation for solvers by default (default: true)
+//      unsat_core        bool    Enable unsat core generation for solvers by default (default: false)
+//
+// Most of these can be changed after a Context is created using
+// Context.Config().
+func NewContextConfig() *Config {
+	// Based on context_params.cpp:collect_param_descrs.
+	// Unfortunately, there's no way to access this from the API.
+	return newConfig([]param{
+		{"timeout", "uint", "Timeout in milliseconds used for solvers"},
+		{"rlimit", "uint", "Resource limit used for solvers"},
+		{"well_sorted_check", "bool", "Type checker"},
+		{"auto_config", "bool", "Use heuristics to automatically select solver and configure it"},
+		{"model_validate", "bool", "Validate models produced by solvers"},
+		{"dump_models", "bool", "Dump models whenever check-sat returns sat"},
+		{"trace", "bool", "Trace generation for VCC"},
+		{"trace_file_name", "string", "Trace out file for VCC traces"},
+		{"debug_ref_count", "bool", "Debug support for AST reference counting"},
+		{"smtlib2_compliant", "bool", "Enable SMT-LIB 2.0 compliance"},
+		// Solver parameters.
+		{"proof", "bool", "Enable proof generation"},
+		{"model", "bool", "Enable model generation for solvers"},
+		{"unsat_core", "bool", "Enable unsat-core generation for solvers"},
+	})
+}
+
+// Config returns a *Config object for dynamically changing ctx's
+// configuration.
+func (ctx *Context) Config() *Config {
+	cfg := NewContextConfig()
+	cfg.set = ctx.setParam
+	return cfg
+}
+
+func (ctx *Context) setParam(name string, val interface{}) {
+	cname, cval := C.CString(name), C.CString(fmt.Sprint(val))
+	defer C.free(unsafe.Pointer(cname))
+	defer C.free(unsafe.Pointer(cval))
+	ctx.do(func() {
+		C.Z3_update_param_value(ctx.c, cname, cval)
+	})
+}
 
 // Interrupt stops the current solver, simplifier, or tactic being
 // executed by ctx.
