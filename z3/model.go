@@ -74,3 +74,47 @@ func (m *Model) String() string {
 	runtime.KeepAlive(m)
 	return res
 }
+
+// Sorts returns the uninterpreted sorts that m assigns an
+// interpretation to.
+//
+// Each of these interpretations is a finite set of distinct values
+// known as the "universe" of the sort. These values can be retrieved
+// with SortUniverse.
+func (m *Model) Sorts() []Sort {
+	var res []Sort
+	m.ctx.do(func() {
+		n := C.Z3_model_get_num_sorts(m.ctx.c, m.c)
+		res = make([]Sort, n)
+		for i := C.uint(0); i < n; i++ {
+			csort := C.Z3_model_get_sort(m.ctx.c, m.c, i)
+			res[i] = wrapSort(m.ctx, csort, KindUninterpreted)
+		}
+	})
+	runtime.KeepAlive(m)
+	return res
+}
+
+// SortUniverse returns the interpretation of s in m. s must be in the
+// set returned by m.Sorts.
+//
+// The interpretation of s is a finite set of distinct values of sort
+// s.
+func (m *Model) SortUniverse(s Sort) []Uninterpreted {
+	var cvec C.Z3_ast_vector
+	var n C.uint
+	m.ctx.do(func() {
+		cvec = C.Z3_model_get_sort_universe(m.ctx.c, m.c, s.c)
+		C.Z3_ast_vector_inc_ref(m.ctx.c, cvec)
+		n = C.Z3_ast_vector_size(m.ctx.c, cvec)
+	})
+	defer m.ctx.do(func() { C.Z3_ast_vector_dec_ref(m.ctx.c, cvec) })
+	res := make([]Uninterpreted, n)
+	for i := C.uint(0); i < n; i++ {
+		res[i] = Uninterpreted(wrapValue(m.ctx, func() C.Z3_ast {
+			return C.Z3_ast_vector_get(m.ctx.c, cvec, i)
+		}))
+	}
+	runtime.KeepAlive(m)
+	return res
+}
