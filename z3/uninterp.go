@@ -14,6 +14,9 @@ import "C"
 // Uninterpreted values have identity—that is, they can be compared
 // for equality—but have no inherent meaning otherwise.
 //
+// Uninterpreted and FiniteDomain are similar, except that
+// Uninterpreted values come from an unbounded universe.
+//
 // Uninterpreted implements Value.
 type Uninterpreted value
 
