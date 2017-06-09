@@ -199,7 +199,9 @@ func (l BV) Mul(r BV) BV {
 	return BV(val)
 }
 
-// UDiv returns the unsigned quotient of l divided by r.
+// UDiv returns the floor of l / r, treating l and r as unsigned.
+//
+// If r is 0, the result is unconstrained.
 //
 // l and r must have the same size.
 func (l BV) UDiv(r BV) BV {
@@ -213,7 +215,10 @@ func (l BV) UDiv(r BV) BV {
 	return BV(val)
 }
 
-// SDiv returns the two's complement signed quotient of l divided by r.
+// SDiv returns l / r rounded toward 0, treating l and r as two's
+// complement signed numbers.
+//
+// If r is 0, the result is unconstrained.
 //
 // l and r must have the same size.
 func (l BV) SDiv(r BV) BV {

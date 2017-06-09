@@ -61,6 +61,9 @@ func (l Int) Mod(r Int) Int {
 // Rem returns remainder of l / r.
 //
 // The sign of the result follows the sign of l.
+//
+// Note that this differs subtly from Go's remainder operator because
+// this is based floored division rather than truncated division.
 func (l Int) Rem(r Int) Int {
 	// Generated from int.go:80.
 	ctx := l.ctx
