@@ -81,6 +81,16 @@ func (s Sort) BVSize() int {
 	return size
 }
 
+// DomainAndRange returns the domain and range of an array sort.
+func (s Sort) DomainAndRange() (domain, range_ Sort) {
+	s.ctx.do(func() {
+		domain = wrapSort(s.ctx, C.Z3_get_array_sort_domain(s.ctx.c, s.c), KindUnknown)
+		range_ = wrapSort(s.ctx, C.Z3_get_array_sort_range(s.ctx.c, s.c), KindUnknown)
+	})
+	runtime.KeepAlive(s)
+	return
+}
+
 // AsAST returns the AST representation of s.
 func (s Sort) AsAST() AST {
 	var ast AST

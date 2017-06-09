@@ -143,4 +143,26 @@ func (f FuncDecl) Apply(args ...Value) Value {
 	return val.lift(KindUnknown)
 }
 
+// Map applies f to each value in each of the args array.
+//
+// Given that f has sort range_1, ..., range_n -> range, args[i] must
+// have array sort [domain -> range_i]. The result will have array
+// sort [domain -> range].
+func (f FuncDecl) Map(args ...Array) Array {
+	cargs := make([]C.Z3_ast, len(args))
+	for i, arg := range args {
+		cargs[i] = arg.impl().c
+	}
+	val := wrapValue(f.ctx, func() C.Z3_ast {
+		var cap *C.Z3_ast
+		if len(cargs) > 0 {
+			cap = &cargs[0]
+		}
+		return C.Z3_mk_map(f.ctx.c, f.c, C.uint(len(cargs)), cap)
+	})
+	runtime.KeepAlive(f)
+	runtime.KeepAlive(args)
+	return Array(val)
+}
+
 // TODO: Lots of accessors
