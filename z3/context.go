@@ -31,16 +31,24 @@ import "C"
 // operations (one notable exception is Interrupt). Hence, to do
 // things in parallel, it's best to create multiple Contexts.
 type Context struct {
-	c C.Z3_context
+	*contextImpl
 
 	syms map[string]C.Z3_symbol
 
+	// extra contains extra values associated with this Context.
+	// This must be outside contextImpl so objects that reference
+	// Context (e.g., Values and Sorts) can be added to here
+	// without creating a cycle and preventing finalization.
 	extra map[interface{}]interface{}
 
 	// lock protects AST reference counts and the context's last
 	// error. Use Context.do to acquire this around a Z3 operation
 	// and panic if the operation has an error status.
 	lock sync.Mutex
+}
+
+type contextImpl struct {
+	c C.Z3_context
 }
 
 //export goZ3ErrorHandler
@@ -69,15 +77,16 @@ func NewContext(config *Config) *Context {
 		}
 	}
 	// Construct the Z3_context.
+	impl := &contextImpl{C.Z3_mk_context_rc(cfg)}
+	runtime.SetFinalizer(impl, func(impl *contextImpl) {
+		C.Z3_del_context(impl.c)
+	})
 	ctx := &Context{
-		C.Z3_mk_context_rc(cfg),
+		impl,
 		make(map[string]C.Z3_symbol),
 		nil,
 		sync.Mutex{},
 	}
-	runtime.SetFinalizer(ctx, func(ctx *Context) {
-		C.Z3_del_context(ctx.c)
-	})
 	// Install an error handler that turns errors into Go panics.
 	// This error handler is equivalent to a longjmp on the C++
 	// side, but Z3 is actually designed to handle that, which is
