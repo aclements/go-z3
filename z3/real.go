@@ -132,3 +132,17 @@ func (lit Real) Approx(precision int) (lower, upper Real, isLiteralIrrational bo
 // IsInt returns a Value that is true if l has no fractional part.
 //
 //wrap:expr IsInt:Bool Z3_mk_is_int l
+
+// ToFloat converts l into a floating-point number.
+//
+// If necessary, the result will be rounded according to the current
+// rounding mode.
+//
+//wrap:expr ToFloat:Float l s:Sort : Z3_mk_fpa_to_fp_real @rm l s
+
+// ToFloatExp converts l into a floating-point number l*2^exp.
+//
+// If necessary, the result will be rounded according to the current
+// rounding mode.
+//
+//wrap:expr ToFloatExp:Float l exp:Int s:Sort : Z3_mk_fpa_to_fp_int_real @rm exp l s

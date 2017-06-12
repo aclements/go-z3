@@ -341,4 +341,25 @@ func (lit BV) AsUint64() (val uint64, isLiteral, ok bool) {
 //
 //wrap:expr UToInt:Int l : Z3_mk_bv2int l "C.Z3_FALSE"
 
+// IEEEToFloat converts l into a floating-point number, interpreting l
+// in IEEE 754-2008 format.
+//
+// The size of l must equal ebits+sbits of s.
+//
+//wrap:expr IEEEToFloat:Float l s:Sort : Z3_mk_fpa_to_fp_bv l s
+
+// SToFloat converts signed bit-vector l into a floating-point number.
+//
+// If necessary, the result will be rounded according to the current
+// rounding mode.
+//
+//wrap:expr SToFloat:Float l s:Sort : Z3_mk_fpa_to_fp_signed @rm l s
+
+// UToFloat converts unsigned bit-vector l into a floating-point number.
+//
+// If necessary, the result will be rounded according to the current
+// rounding mode.
+//
+//wrap:expr UToFloat:Float l s:Sort : Z3_mk_fpa_to_fp_unsigned @rm l s
+
 // TODO: Z3_mk_bv*_no_{over,under}flow

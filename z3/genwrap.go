@@ -108,11 +108,12 @@ type directive struct {
 	goFn, cFn     string
 	goArgs, cArgs []*arg
 	isDDD         bool
+	hasRM         bool
 	resType       string
 }
 
 type arg struct {
-	name, goTyp, cExpr, cCode string
+	name, goTyp, cExpr, cCode, setup string
 }
 
 func (a arg) c(varName string) string {
@@ -147,15 +148,29 @@ func parseDirective(parts []string) *directive {
 	}
 
 	cArgs := parts[cPos+1:]
-	goArgs := cArgs
+	goArgs := append([]string(nil), cArgs...)
 	if colon >= 0 {
 		goArgs = parts[2:colon]
+	}
+
+	// Strip @rm from goArgs since it's implied from ctx.
+	for i := 0; i < len(goArgs); i++ {
+		if goArgs[i] == "@rm" {
+			copy(goArgs[i:], goArgs[i+1:])
+			goArgs = goArgs[:len(goArgs)-1]
+			i--
+		}
+	}
+	for _, a := range cArgs {
+		if a == "@rm" {
+			dir.hasRM = true
+		}
 	}
 
 	argMap := make(map[string]*arg)
 	for _, goArg := range goArgs {
 		name, goTyp := split(goArg, defType)
-		argMap[name] = &arg{name, goTyp, "", ""}
+		argMap[name] = &arg{name, goTyp, "", "", ""}
 		dir.goArgs = append(dir.goArgs, argMap[name])
 	}
 	for _, cArg := range cArgs {
@@ -163,6 +178,11 @@ func parseDirective(parts []string) *directive {
 			// Literal code.
 			cCode := cArg[1 : len(cArg)-1]
 			dir.cArgs = append(dir.cArgs, &arg{cCode: cCode})
+			continue
+		}
+		if cArg == "@rm" {
+			// Rounding mode from ctx.
+			dir.cArgs = append(dir.cArgs, &arg{cCode: "rm.c"})
 			continue
 		}
 
@@ -174,6 +194,9 @@ func parseDirective(parts []string) *directive {
 		}
 		if cTyp == "" && arg.goTyp == "Value" {
 			arg.cExpr = "%s.impl().c" // Value interface
+		} else if cTyp == "" && arg.goTyp == "RoundingMode" {
+			arg.setup = "rmc := " + arg.name + ".ast(ctx)"
+			arg.cCode = "rmc.c"
 		} else if cTyp == "" {
 			arg.cExpr = "%s.c" // expr wrapper
 		} else {
@@ -241,6 +264,18 @@ func genMethod(w *bytes.Buffer, dir *directive, label string) {
 			fmt.Fprintf(w, " cargs[%d] = %s\n", i, arg.c(arg.name))
 		}
 		fmt.Fprintf(w, " for i, arg := range %s { cargs[i+%d] = %s }\n", ddd, len(dir.cArgs)-1, arg.c("arg"))
+	}
+
+	if dir.hasRM {
+		// Get the rounding mode before we take the ctx lock.
+		fmt.Fprintf(w, "rm := ctx.rm()\n")
+	}
+
+	// Perform any setup code.
+	for _, a := range dir.cArgs {
+		if a.setup != "" {
+			fmt.Fprintf(w, "%s\n", a.setup)
+		}
 	}
 
 	// Construct the AST.

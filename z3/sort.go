@@ -81,6 +81,16 @@ func (s Sort) BVSize() int {
 	return size
 }
 
+// FloatSize returns the number of exponent and significand bits in s.
+func (s Sort) FloatSize() (ebits, sbits int) {
+	s.ctx.do(func() {
+		ebits = int(C.Z3_fpa_get_ebits(s.ctx.c, s.c))
+		sbits = int(C.Z3_fpa_get_sbits(s.ctx.c, s.c))
+	})
+	runtime.KeepAlive(s)
+	return
+}
+
 // DomainAndRange returns the domain and range of an array sort.
 func (s Sort) DomainAndRange() (domain, range_ Sort) {
 	s.ctx.do(func() {

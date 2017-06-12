@@ -549,3 +549,50 @@ func (l BV) UToInt() Int {
 	runtime.KeepAlive(l)
 	return Int(val)
 }
+
+// IEEEToFloat converts l into a floating-point number, interpreting l
+// in IEEE 754-2008 format.
+//
+// The size of l must equal ebits+sbits of s.
+func (l BV) IEEEToFloat(s Sort) Float {
+	// Generated from bv.go:349.
+	ctx := l.ctx
+	val := wrapValue(ctx, func() C.Z3_ast {
+		return C.Z3_mk_fpa_to_fp_bv(ctx.c, l.c, s.c)
+	})
+	runtime.KeepAlive(l)
+	runtime.KeepAlive(s)
+	return Float(val)
+}
+
+// SToFloat converts signed bit-vector l into a floating-point number.
+//
+// If necessary, the result will be rounded according to the current
+// rounding mode.
+func (l BV) SToFloat(s Sort) Float {
+	// Generated from bv.go:356.
+	ctx := l.ctx
+	rm := ctx.rm()
+	val := wrapValue(ctx, func() C.Z3_ast {
+		return C.Z3_mk_fpa_to_fp_signed(ctx.c, rm.c, l.c, s.c)
+	})
+	runtime.KeepAlive(l)
+	runtime.KeepAlive(s)
+	return Float(val)
+}
+
+// UToFloat converts unsigned bit-vector l into a floating-point number.
+//
+// If necessary, the result will be rounded according to the current
+// rounding mode.
+func (l BV) UToFloat(s Sort) Float {
+	// Generated from bv.go:363.
+	ctx := l.ctx
+	rm := ctx.rm()
+	val := wrapValue(ctx, func() C.Z3_ast {
+		return C.Z3_mk_fpa_to_fp_unsigned(ctx.c, rm.c, l.c, s.c)
+	})
+	runtime.KeepAlive(l)
+	runtime.KeepAlive(s)
+	return Float(val)
+}

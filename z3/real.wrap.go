@@ -65,6 +65,39 @@ func (l Real) IsInt() Bool {
 	return Bool(val)
 }
 
+// ToFloat converts l into a floating-point number.
+//
+// If necessary, the result will be rounded according to the current
+// rounding mode.
+func (l Real) ToFloat(s Sort) Float {
+	// Generated from real.go:141.
+	ctx := l.ctx
+	rm := ctx.rm()
+	val := wrapValue(ctx, func() C.Z3_ast {
+		return C.Z3_mk_fpa_to_fp_real(ctx.c, rm.c, l.c, s.c)
+	})
+	runtime.KeepAlive(l)
+	runtime.KeepAlive(s)
+	return Float(val)
+}
+
+// ToFloatExp converts l into a floating-point number l*2^exp.
+//
+// If necessary, the result will be rounded according to the current
+// rounding mode.
+func (l Real) ToFloatExp(exp Int, s Sort) Float {
+	// Generated from real.go:148.
+	ctx := l.ctx
+	rm := ctx.rm()
+	val := wrapValue(ctx, func() C.Z3_ast {
+		return C.Z3_mk_fpa_to_fp_int_real(ctx.c, rm.c, exp.c, l.c, s.c)
+	})
+	runtime.KeepAlive(l)
+	runtime.KeepAlive(exp)
+	runtime.KeepAlive(s)
+	return Float(val)
+}
+
 // Add returns the sum l + r[0] + r[1] + ...
 func (l Real) Add(r ...Real) Real {
 	// Generated from intreal.go:12.

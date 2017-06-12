@@ -116,8 +116,11 @@ func (ctx *Context) FreshConst(prefix string, sort Sort) Value {
 }
 
 // FromBigInt returns a literal whose value is val. sort must have
-// kind int, real, finite-domain, or bit-vector.
+// kind int, real, finite-domain, bit-vector, or float.
 func (ctx *Context) FromBigInt(val *big.Int, sort Sort) Value {
+	if sort.Kind() == KindFloatingPoint {
+		return ctx.floatFromBigInt(val, sort)
+	}
 	cstr := C.CString(val.Text(10))
 	defer C.free(unsafe.Pointer(cstr))
 	sval := wrapValue(ctx, func() C.Z3_ast {
@@ -127,9 +130,15 @@ func (ctx *Context) FromBigInt(val *big.Int, sort Sort) Value {
 	return sval.lift(sort.Kind())
 }
 
+// TODO: FromBigFloat for real and float sorts (or maybe just float
+// sorts since we can deduce the sbits from the big.Float?).
+
 // FromInt returns a literal whose value is val. sort must have kind
-// int, real, finite-domain, or bit-vector.
+// int, real, finite-domain, bit-vector, or float.
 func (ctx *Context) FromInt(val int64, sort Sort) Value {
+	if sort.Kind() == KindFloatingPoint {
+		return ctx.floatFromInt(val, sort)
+	}
 	sval := wrapValue(ctx, func() C.Z3_ast {
 		// Z3_mk_int64 doesn't say real sorts are accepted,
 		// but the C++ bindings use it for reals.
@@ -238,4 +247,13 @@ func (expr *valueImpl) asUint64() (val uint64, isLiteral, ok bool) {
 		ok = z3ToBool(C.Z3_get_numeral_uint64(expr.ctx.c, expr.c, &cval))
 	})
 	return uint64(cval), true, ok
+}
+
+func (expr *valueImpl) isAppOf(k C.Z3_decl_kind) bool {
+	var res bool
+	expr.ctx.do(func() {
+		res = z3ToBool(C.Z3_is_app(expr.ctx.c, expr.c)) && C.Z3_get_decl_kind(expr.ctx.c, C.Z3_get_app_decl(expr.ctx.c, C.Z3_to_app(expr.ctx.c, expr.c))) == k
+	})
+	runtime.KeepAlive(expr)
+	return res
 }

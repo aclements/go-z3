@@ -35,6 +35,14 @@ type Context struct {
 
 	syms map[string]C.Z3_symbol
 
+	// roundingMode is the current floating-point rounding mode.
+	roundingMode RoundingMode
+
+	// roundingModeAST is AST of roundingMode, or the zero value
+	// if no floating-point math has been performed yet. Use rm()
+	// to get the rounding mode AST.
+	roundingModeAST value
+
 	// extra contains extra values associated with this Context.
 	// This must be outside contextImpl so objects that reference
 	// Context (e.g., Values and Sorts) can be added to here
@@ -84,6 +92,8 @@ func NewContext(config *Config) *Context {
 	ctx := &Context{
 		impl,
 		make(map[string]C.Z3_symbol),
+		RoundToNearestEven,
+		value{},
 		nil,
 		sync.Mutex{},
 	}
