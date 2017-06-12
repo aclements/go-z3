@@ -31,7 +31,7 @@ func (l Bool) NE(r Bool) Bool {
 //
 // All Values must have the same sort.
 func (ctx *Context) Distinct(vals ...Value) Bool {
-	// Generated from logic.go:69.
+	// Generated from logic.go:68.
 	cargs := make([]C.Z3_ast, len(vals)+0)
 	for i, arg := range vals {
 		cargs[i+0] = arg.impl().c
@@ -45,7 +45,7 @@ func (ctx *Context) Distinct(vals ...Value) Bool {
 
 // Not returns the boolean negation of l.
 func (l Bool) Not() Bool {
-	// Generated from logic.go:73.
+	// Generated from logic.go:72.
 	ctx := l.ctx
 	val := wrapValue(ctx, func() C.Z3_ast {
 		return C.Z3_mk_not(ctx.c, l.c)
@@ -60,7 +60,7 @@ func (l Bool) Not() Bool {
 // cons and alt must have the same sort. The result will have the same
 // sort as cons and alt.
 func (cond Bool) IfThenElse(cons Value, alt Value) Value {
-	// Generated from logic.go:81.
+	// Generated from logic.go:80.
 	ctx := cond.ctx
 	val := wrapValue(ctx, func() C.Z3_ast {
 		return C.Z3_mk_ite(ctx.c, cond.c, cons.impl().c, alt.impl().c)
@@ -74,7 +74,7 @@ func (cond Bool) IfThenElse(cons Value, alt Value) Value {
 // Iff returns a Value that is true if l and r are equal (l
 // if-and-only-if r).
 func (l Bool) Iff(r Bool) Bool {
-	// Generated from logic.go:86.
+	// Generated from logic.go:85.
 	ctx := l.ctx
 	val := wrapValue(ctx, func() C.Z3_ast {
 		return C.Z3_mk_iff(ctx.c, l.c, r.c)
@@ -86,7 +86,7 @@ func (l Bool) Iff(r Bool) Bool {
 
 // Implies returns a Value that is true if l implies r.
 func (l Bool) Implies(r Bool) Bool {
-	// Generated from logic.go:90.
+	// Generated from logic.go:89.
 	ctx := l.ctx
 	val := wrapValue(ctx, func() C.Z3_ast {
 		return C.Z3_mk_implies(ctx.c, l.c, r.c)
@@ -98,7 +98,7 @@ func (l Bool) Implies(r Bool) Bool {
 
 // Xor returns a Value that is true if l xor r.
 func (l Bool) Xor(r Bool) Bool {
-	// Generated from logic.go:94.
+	// Generated from logic.go:93.
 	ctx := l.ctx
 	val := wrapValue(ctx, func() C.Z3_ast {
 		return C.Z3_mk_xor(ctx.c, l.c, r.c)
@@ -110,7 +110,7 @@ func (l Bool) Xor(r Bool) Bool {
 
 // And returns a Value that is true if l and all arguments are true.
 func (l Bool) And(r ...Bool) Bool {
-	// Generated from logic.go:98.
+	// Generated from logic.go:97.
 	ctx := l.ctx
 	cargs := make([]C.Z3_ast, len(r)+1)
 	cargs[0] = l.c
@@ -126,7 +126,7 @@ func (l Bool) And(r ...Bool) Bool {
 
 // Or returns a Value that is true if l or any argument is true.
 func (l Bool) Or(r ...Bool) Bool {
-	// Generated from logic.go:102.
+	// Generated from logic.go:101.
 	ctx := l.ctx
 	cargs := make([]C.Z3_ast, len(r)+1)
 	cargs[0] = l.c

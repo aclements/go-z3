@@ -65,7 +65,7 @@ func (l Int) Mod(r Int) Int {
 // Note that this differs subtly from Go's remainder operator because
 // this is based floored division rather than truncated division.
 func (l Int) Rem(r Int) Int {
-	// Generated from int.go:80.
+	// Generated from int.go:83.
 	ctx := l.ctx
 	val := wrapValue(ctx, func() C.Z3_ast {
 		return C.Z3_mk_rem(ctx.c, l.c, r.c)
@@ -77,7 +77,7 @@ func (l Int) Rem(r Int) Int {
 
 // ToReal converts l to sort Real.
 func (l Int) ToReal() Real {
-	// Generated from int.go:84.
+	// Generated from int.go:87.
 	ctx := l.ctx
 	val := wrapValue(ctx, func() C.Z3_ast {
 		return C.Z3_mk_int2real(ctx.c, l.c)
@@ -88,7 +88,7 @@ func (l Int) ToReal() Real {
 
 // ToBV converts l to a bit-vector of width bits.
 func (l Int) ToBV(bits int) BV {
-	// Generated from int.go:88.
+	// Generated from int.go:91.
 	ctx := l.ctx
 	val := wrapValue(ctx, func() C.Z3_ast {
 		return C.Z3_mk_int2bv(ctx.c, C.unsigned(bits), l.c)

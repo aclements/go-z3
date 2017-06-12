@@ -205,7 +205,7 @@ func (l BV) Mul(r BV) BV {
 //
 // l and r must have the same size.
 func (l BV) UDiv(r BV) BV {
-	// Generated from bv.go:191.
+	// Generated from bv.go:193.
 	ctx := l.ctx
 	val := wrapValue(ctx, func() C.Z3_ast {
 		return C.Z3_mk_bvudiv(ctx.c, l.c, r.c)
@@ -222,7 +222,7 @@ func (l BV) UDiv(r BV) BV {
 //
 // l and r must have the same size.
 func (l BV) SDiv(r BV) BV {
-	// Generated from bv.go:197.
+	// Generated from bv.go:202.
 	ctx := l.ctx
 	val := wrapValue(ctx, func() C.Z3_ast {
 		return C.Z3_mk_bvsdiv(ctx.c, l.c, r.c)
@@ -236,7 +236,7 @@ func (l BV) SDiv(r BV) BV {
 //
 // l and r must have the same size.
 func (l BV) URem(r BV) BV {
-	// Generated from bv.go:203.
+	// Generated from bv.go:208.
 	ctx := l.ctx
 	val := wrapValue(ctx, func() C.Z3_ast {
 		return C.Z3_mk_bvurem(ctx.c, l.c, r.c)
@@ -252,7 +252,7 @@ func (l BV) URem(r BV) BV {
 //
 // l and r must have the same size.
 func (l BV) SRem(r BV) BV {
-	// Generated from bv.go:211.
+	// Generated from bv.go:216.
 	ctx := l.ctx
 	val := wrapValue(ctx, func() C.Z3_ast {
 		return C.Z3_mk_bvsrem(ctx.c, l.c, r.c)
@@ -268,7 +268,7 @@ func (l BV) SRem(r BV) BV {
 //
 // l and r must have the same size.
 func (l BV) SMod(r BV) BV {
-	// Generated from bv.go:219.
+	// Generated from bv.go:224.
 	ctx := l.ctx
 	val := wrapValue(ctx, func() C.Z3_ast {
 		return C.Z3_mk_bvsmod(ctx.c, l.c, r.c)
@@ -282,7 +282,7 @@ func (l BV) SMod(r BV) BV {
 //
 // l and r must have the same size.
 func (l BV) ULT(r BV) Bool {
-	// Generated from bv.go:225.
+	// Generated from bv.go:230.
 	ctx := l.ctx
 	val := wrapValue(ctx, func() C.Z3_ast {
 		return C.Z3_mk_bvult(ctx.c, l.c, r.c)
@@ -296,7 +296,7 @@ func (l BV) ULT(r BV) Bool {
 //
 // l and r must have the same size.
 func (l BV) SLT(r BV) Bool {
-	// Generated from bv.go:231.
+	// Generated from bv.go:236.
 	ctx := l.ctx
 	val := wrapValue(ctx, func() C.Z3_ast {
 		return C.Z3_mk_bvslt(ctx.c, l.c, r.c)
@@ -310,7 +310,7 @@ func (l BV) SLT(r BV) Bool {
 //
 // l and r must have the same size.
 func (l BV) ULE(r BV) Bool {
-	// Generated from bv.go:237.
+	// Generated from bv.go:242.
 	ctx := l.ctx
 	val := wrapValue(ctx, func() C.Z3_ast {
 		return C.Z3_mk_bvule(ctx.c, l.c, r.c)
@@ -324,7 +324,7 @@ func (l BV) ULE(r BV) Bool {
 //
 // l and r must have the same size.
 func (l BV) SLE(r BV) Bool {
-	// Generated from bv.go:243.
+	// Generated from bv.go:248.
 	ctx := l.ctx
 	val := wrapValue(ctx, func() C.Z3_ast {
 		return C.Z3_mk_bvsle(ctx.c, l.c, r.c)
@@ -338,7 +338,7 @@ func (l BV) SLE(r BV) Bool {
 //
 // l and r must have the same size.
 func (l BV) UGE(r BV) Bool {
-	// Generated from bv.go:249.
+	// Generated from bv.go:254.
 	ctx := l.ctx
 	val := wrapValue(ctx, func() C.Z3_ast {
 		return C.Z3_mk_bvuge(ctx.c, l.c, r.c)
@@ -352,7 +352,7 @@ func (l BV) UGE(r BV) Bool {
 //
 // l and r must have the same size.
 func (l BV) SGE(r BV) Bool {
-	// Generated from bv.go:255.
+	// Generated from bv.go:260.
 	ctx := l.ctx
 	val := wrapValue(ctx, func() C.Z3_ast {
 		return C.Z3_mk_bvsge(ctx.c, l.c, r.c)
@@ -366,7 +366,7 @@ func (l BV) SGE(r BV) Bool {
 //
 // l and r must have the same size.
 func (l BV) UGT(r BV) Bool {
-	// Generated from bv.go:261.
+	// Generated from bv.go:266.
 	ctx := l.ctx
 	val := wrapValue(ctx, func() C.Z3_ast {
 		return C.Z3_mk_bvugt(ctx.c, l.c, r.c)
@@ -380,7 +380,7 @@ func (l BV) UGT(r BV) Bool {
 //
 // l and r must have the same size.
 func (l BV) SGT(r BV) Bool {
-	// Generated from bv.go:267.
+	// Generated from bv.go:272.
 	ctx := l.ctx
 	val := wrapValue(ctx, func() C.Z3_ast {
 		return C.Z3_mk_bvsgt(ctx.c, l.c, r.c)
@@ -395,7 +395,7 @@ func (l BV) SGT(r BV) Bool {
 // The result is a bit-vector whose length is the sum of the lengths
 // of l and r.
 func (l BV) Concat(r BV) BV {
-	// Generated from bv.go:274.
+	// Generated from bv.go:279.
 	ctx := l.ctx
 	val := wrapValue(ctx, func() C.Z3_ast {
 		return C.Z3_mk_concat(ctx.c, l.c, r.c)
@@ -408,7 +408,7 @@ func (l BV) Concat(r BV) BV {
 // Extract returns bits [high, low] (inclusive) of l, where bit 0 is
 // the least significant bit.
 func (l BV) Extract(high int, low int) BV {
-	// Generated from bv.go:279.
+	// Generated from bv.go:284.
 	ctx := l.ctx
 	val := wrapValue(ctx, func() C.Z3_ast {
 		return C.Z3_mk_extract(ctx.c, C.unsigned(high), C.unsigned(low), l.c)
@@ -420,7 +420,7 @@ func (l BV) Extract(high int, low int) BV {
 // SignExtend returns l sign-extended to a bit-vector of length m+i,
 // where m is the length of l.
 func (l BV) SignExtend(i int) BV {
-	// Generated from bv.go:284.
+	// Generated from bv.go:289.
 	ctx := l.ctx
 	val := wrapValue(ctx, func() C.Z3_ast {
 		return C.Z3_mk_sign_ext(ctx.c, C.unsigned(i), l.c)
@@ -432,7 +432,7 @@ func (l BV) SignExtend(i int) BV {
 // ZeroExtend returns l zero-extended to a bit-vector of length m+i,
 // where m is the length of l.
 func (l BV) ZeroExtend(i int) BV {
-	// Generated from bv.go:289.
+	// Generated from bv.go:294.
 	ctx := l.ctx
 	val := wrapValue(ctx, func() C.Z3_ast {
 		return C.Z3_mk_zero_ext(ctx.c, C.unsigned(i), l.c)
@@ -443,7 +443,7 @@ func (l BV) ZeroExtend(i int) BV {
 
 // Repeat returns l repeated up to length i.
 func (l BV) Repeat(i int) BV {
-	// Generated from bv.go:293.
+	// Generated from bv.go:298.
 	ctx := l.ctx
 	val := wrapValue(ctx, func() C.Z3_ast {
 		return C.Z3_mk_repeat(ctx.c, C.unsigned(i), l.c)
@@ -458,7 +458,7 @@ func (l BV) Repeat(i int) BV {
 //
 // l and i must have the same size. The result has the same sort.
 func (l BV) Lsh(i BV) BV {
-	// Generated from bv.go:301.
+	// Generated from bv.go:306.
 	ctx := l.ctx
 	val := wrapValue(ctx, func() C.Z3_ast {
 		return C.Z3_mk_bvshl(ctx.c, l.c, i.c)
@@ -474,7 +474,7 @@ func (l BV) Lsh(i BV) BV {
 //
 // l and i must have the same size. The result has the same sort.
 func (l BV) URsh(i BV) BV {
-	// Generated from bv.go:309.
+	// Generated from bv.go:314.
 	ctx := l.ctx
 	val := wrapValue(ctx, func() C.Z3_ast {
 		return C.Z3_mk_bvlshr(ctx.c, l.c, i.c)
@@ -490,7 +490,7 @@ func (l BV) URsh(i BV) BV {
 //
 // l and i must have the same size. The result has the same sort.
 func (l BV) SRsh(i BV) BV {
-	// Generated from bv.go:317.
+	// Generated from bv.go:322.
 	ctx := l.ctx
 	val := wrapValue(ctx, func() C.Z3_ast {
 		return C.Z3_mk_bvashr(ctx.c, l.c, i.c)
@@ -504,7 +504,7 @@ func (l BV) SRsh(i BV) BV {
 //
 // l and i must have the same size.
 func (l BV) RotateLeft(i BV) BV {
-	// Generated from bv.go:323.
+	// Generated from bv.go:328.
 	ctx := l.ctx
 	val := wrapValue(ctx, func() C.Z3_ast {
 		return C.Z3_mk_ext_rotate_left(ctx.c, l.c, i.c)
@@ -518,7 +518,7 @@ func (l BV) RotateLeft(i BV) BV {
 //
 // l and i must have the same size.
 func (l BV) RotateRight(i BV) BV {
-	// Generated from bv.go:329.
+	// Generated from bv.go:334.
 	ctx := l.ctx
 	val := wrapValue(ctx, func() C.Z3_ast {
 		return C.Z3_mk_ext_rotate_right(ctx.c, l.c, i.c)
@@ -530,7 +530,7 @@ func (l BV) RotateRight(i BV) BV {
 
 // SToInt converts signed bit-vector l to an integer.
 func (l BV) SToInt() Int {
-	// Generated from bv.go:333.
+	// Generated from bv.go:338.
 	ctx := l.ctx
 	val := wrapValue(ctx, func() C.Z3_ast {
 		return C.Z3_mk_bv2int(ctx.c, l.c, C.Z3_TRUE)
@@ -541,7 +541,7 @@ func (l BV) SToInt() Int {
 
 // UToInt converts unsigned bit-vector l to an integer.
 func (l BV) UToInt() Int {
-	// Generated from bv.go:337.
+	// Generated from bv.go:342.
 	ctx := l.ctx
 	val := wrapValue(ctx, func() C.Z3_ast {
 		return C.Z3_mk_bv2int(ctx.c, l.c, C.Z3_FALSE)
