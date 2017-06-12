@@ -10,15 +10,6 @@ import (
 	"testing"
 )
 
-func simplifyBool(t *testing.T, ctx *Context, x Bool) bool {
-	y := ctx.Simplify(x, nil).(Bool)
-	eq, ok := y.AsBool()
-	if !ok {
-		t.Fatal("Simplify(%s) = %s, want bool literal", x, y)
-	}
-	return eq
-}
-
 func TestFloatFromInt(t *testing.T) {
 	ctx := NewContext(nil)
 	isort := ctx.IntSort()

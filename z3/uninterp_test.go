@@ -5,8 +5,6 @@
 package z3
 
 import (
-	"fmt"
-	"regexp"
 	"testing"
 )
 
@@ -52,22 +50,4 @@ func TestUninterpreted(t *testing.T) {
 	// If we ask for a sort that's not interpreted by m, we should
 	// get an "invalid argument" panic.
 	wantPanic(t, "invalid argument", func() { m.SortUniverse(u2) })
-}
-
-func wantPanic(t *testing.T, match string, cb func()) {
-	re, err := regexp.Compile(match)
-	if err != nil {
-		t.Fatal("error compiling regexp: ", err)
-	}
-	defer func() {
-		err := recover()
-		if err == nil {
-			t.Fatalf("want panic matching %q, got success", match)
-		}
-		s := fmt.Sprint(err)
-		if !re.MatchString(s) {
-			t.Fatalf("want panic matching %q, got %s", match, s)
-		}
-	}()
-	cb()
 }
