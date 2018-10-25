@@ -335,11 +335,11 @@ func (lit BV) AsUint64() (val uint64, isLiteral, ok bool) {
 
 // SToInt converts signed bit-vector l to an integer.
 //
-//wrap:expr SToInt:Int l : Z3_mk_bv2int l "C.Z3_TRUE"
+//wrap:expr SToInt:Int l : Z3_mk_bv2int l "true"
 
 // UToInt converts unsigned bit-vector l to an integer.
 //
-//wrap:expr UToInt:Int l : Z3_mk_bv2int l "C.Z3_FALSE"
+//wrap:expr UToInt:Int l : Z3_mk_bv2int l "false"
 
 // IEEEToFloat converts l into a floating-point number, interpreting l
 // in IEEE 754-2008 format.
