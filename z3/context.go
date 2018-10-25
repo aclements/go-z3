@@ -61,7 +61,7 @@ type contextImpl struct {
 
 //export goZ3ErrorHandler
 func goZ3ErrorHandler(ctx C.Z3_context, e C.Z3_error_code) {
-	msg := C.Z3_get_error_msg_ex(ctx, e)
+	msg := C.Z3_get_error_msg(ctx, e)
 	// TODO: Lift the Z3 errors to better Go errors. At least wrap
 	// the string in a type and consider using the error code to
 	// determine which of different error types to use.
