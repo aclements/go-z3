@@ -7,6 +7,7 @@ package z3
 /*
 #cgo LDFLAGS: -lz3
 #include <z3.h>
+#include <stdint.h>
 */
 import "C"
 
@@ -36,7 +37,7 @@ func (ctx *Context) FiniteDomainSort(name string, n uint64) Sort {
 	sym := ctx.symbol(name)
 	var sort Sort
 	ctx.do(func() {
-		sort = wrapSort(ctx, C.Z3_mk_finite_domain_sort(ctx.c, sym, C.__uint64(n)), KindFiniteDomain)
+		sort = wrapSort(ctx, C.Z3_mk_finite_domain_sort(ctx.c, sym, C.uint64_t(n)), KindFiniteDomain)
 	})
 	return sort
 }
