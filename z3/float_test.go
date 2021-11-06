@@ -87,7 +87,7 @@ func TestFloatRound(t *testing.T) {
 		for rm, want := range test.res {
 			fr := f.Round(RoundingMode(rm))
 			if !simplifyBool(t, ctx, fr.Eq(ctx.FromInt(want, s).(Float))) {
-				t.Fatal("Round(%g, %s) = %s, want %d", test.val, RoundingMode(rm), fr, want)
+				t.Fatalf("Round(%g, %v) = %s, want %d", test.val, RoundingMode(rm), fr, want)
 			}
 		}
 	}

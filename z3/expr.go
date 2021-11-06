@@ -142,7 +142,7 @@ func (ctx *Context) FromInt(val int64, sort Sort) Value {
 	sval := wrapValue(ctx, func() C.Z3_ast {
 		// Z3_mk_int64 doesn't say real sorts are accepted,
 		// but the C++ bindings use it for reals.
-		return C.Z3_mk_int64(ctx.c, C.__int64(val), sort.c)
+		return C.Z3_mk_int64(ctx.c, C.int64_t(val), sort.c)
 	})
 	runtime.KeepAlive(sort)
 	return sval.lift(sort.Kind())
@@ -226,7 +226,7 @@ func (expr *valueImpl) asInt64() (val int64, isLiteral, ok bool) {
 	if expr.astKind() != C.Z3_NUMERAL_AST {
 		return 0, false, false
 	}
-	var cval C.__int64
+	var cval C.int64_t
 	expr.ctx.do(func() {
 		ok = z3ToBool(C.Z3_get_numeral_int64(expr.ctx.c, expr.c, &cval))
 	})
@@ -242,7 +242,7 @@ func (expr *valueImpl) asUint64() (val uint64, isLiteral, ok bool) {
 	if expr.astKind() != C.Z3_NUMERAL_AST {
 		return 0, false, false
 	}
-	var cval C.__uint64
+	var cval C.uint64_t
 	expr.ctx.do(func() {
 		ok = z3ToBool(C.Z3_get_numeral_uint64(expr.ctx.c, expr.c, &cval))
 	})

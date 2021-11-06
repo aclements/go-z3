@@ -285,14 +285,8 @@ func (ctx *Context) floatFromInt(val int64, sort Sort) Float {
 				val = up
 			}
 		case RoundToNearestAway:
-			// Despite the name, Z3 implements this as
-			// "round to nearest odd". Bug in Z3?
 			if val == mid {
-				if down&1 == 0 {
-					val = up
-				} else {
-					val = down
-				}
+				val = up
 			} else if val < mid {
 				val = down
 			} else {
@@ -331,7 +325,7 @@ exact:
 		// exponent, but a shifted significand with the
 		// most-significant bit stripped.
 		out := Float(wrapValue(ctx, func() C.Z3_ast {
-			return C.Z3_mk_fpa_numeral_int64_uint64(ctx.c, boolToZ3(neg), C.__int64(exp+lost), C.__uint64(val<<(uint(sbits)-exp-1)), sort.c)
+			return C.Z3_mk_fpa_numeral_int64_uint64(ctx.c, boolToZ3(neg), C.int64_t(exp+lost), C.uint64_t(val<<(uint(sbits)-exp-1)), sort.c)
 		}))
 		runtime.KeepAlive(ctx)
 		return out
@@ -399,11 +393,7 @@ func (ctx *Context) floatFromBigInt(val *big.Int, sort Sort) Float {
 		case RoundToNearestAway:
 			switch x.Cmp(&mid) {
 			case 0:
-				if down.Bit(0) == 0 {
-					x = up
-				} else {
-					x = down
-				}
+				x = up
 			case -1:
 				x = down
 			case 1:
@@ -466,11 +456,11 @@ func (lit Float) AsBigFloat() (val *big.Float, isLiteral bool) {
 	case lit.isAppOf(C.Z3_OP_FPA_NUM):
 		var sign C.int
 		var sig string
-		var exp C.__int64
+		var exp C.int64_t
 		lit.ctx.do(func() {
 			C.Z3_fpa_get_numeral_sign(lit.ctx.c, lit.c, &sign)
 			sig = C.GoString(C.Z3_fpa_get_numeral_significand_string(lit.ctx.c, lit.c))
-			C.Z3_fpa_get_numeral_exponent_int64(lit.ctx.c, lit.c, &exp, C.Z3_FALSE)
+			C.Z3_fpa_get_numeral_exponent_int64(lit.ctx.c, lit.c, &exp, C.Z3_bool(false))
 		})
 		out.Parse(sig, 10)
 		if sign > 0 {
