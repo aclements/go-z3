@@ -45,7 +45,7 @@ func simplifyBool(t *testing.T, ctx *Context, x Bool) bool {
 	y := ctx.Simplify(x, nil).(Bool)
 	eq, ok := y.AsBool()
 	if !ok {
-		t.Fatal("Simplify(%s) = %s, want bool literal", x, y)
+		t.Fatalf("Simplify(%s) = %s, want bool literal", x, y)
 	}
 	return eq
 }

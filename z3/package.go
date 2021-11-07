@@ -58,11 +58,11 @@ import "C"
 
 func boolToZ3(b bool) C.Z3_bool {
 	if b {
-		return C.Z3_TRUE
+		return true
 	}
-	return C.Z3_FALSE
+	return false
 }
 
 func z3ToBool(b C.Z3_bool) bool {
-	return b != C.Z3_FALSE
+	return b != false
 }
