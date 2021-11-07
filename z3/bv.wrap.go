@@ -533,7 +533,7 @@ func (l BV) SToInt() Int {
 	// Generated from bv.go:338.
 	ctx := l.ctx
 	val := wrapValue(ctx, func() C.Z3_ast {
-		return C.Z3_mk_bv2int(ctx.c, l.c, C.Z3_bool(true))
+		return C.Z3_mk_bv2int(ctx.c, l.c, true)
 	})
 	runtime.KeepAlive(l)
 	return Int(val)
@@ -544,7 +544,7 @@ func (l BV) UToInt() Int {
 	// Generated from bv.go:342.
 	ctx := l.ctx
 	val := wrapValue(ctx, func() C.Z3_ast {
-		return C.Z3_mk_bv2int(ctx.c, l.c, C.Z3_bool(false))
+		return C.Z3_mk_bv2int(ctx.c, l.c, false)
 	})
 	runtime.KeepAlive(l)
 	return Int(val)

@@ -460,7 +460,7 @@ func (lit Float) AsBigFloat() (val *big.Float, isLiteral bool) {
 		lit.ctx.do(func() {
 			C.Z3_fpa_get_numeral_sign(lit.ctx.c, lit.c, &sign)
 			sig = C.GoString(C.Z3_fpa_get_numeral_significand_string(lit.ctx.c, lit.c))
-			C.Z3_fpa_get_numeral_exponent_int64(lit.ctx.c, lit.c, &exp, C.Z3_bool(false))
+			C.Z3_fpa_get_numeral_exponent_int64(lit.ctx.c, lit.c, &exp, false)
 		})
 		out.Parse(sig, 10)
 		if sign > 0 {
