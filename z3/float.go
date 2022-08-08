@@ -331,7 +331,7 @@ exact:
 		// exponent, but a shifted significand with the
 		// most-significant bit stripped.
 		out := Float(wrapValue(ctx, func() C.Z3_ast {
-			return C.Z3_mk_fpa_numeral_int64_uint64(ctx.c, boolToZ3(neg), C.__int64(exp+lost), C.__uint64(val<<(uint(sbits)-exp-1)), sort.c)
+			return C.Z3_mk_fpa_numeral_int64_uint64(ctx.c, boolToZ3(neg), C.int64_t(exp+lost), C.uint64_t(val<<(uint(sbits)-exp-1)), sort.c)
 		}))
 		runtime.KeepAlive(ctx)
 		return out
@@ -466,7 +466,7 @@ func (lit Float) AsBigFloat() (val *big.Float, isLiteral bool) {
 	case lit.isAppOf(C.Z3_OP_FPA_NUM):
 		var sign C.int
 		var sig string
-		var exp C.__int64
+		var exp C.int64_t
 		lit.ctx.do(func() {
 			C.Z3_fpa_get_numeral_sign(lit.ctx.c, lit.c, &sign)
 			sig = C.GoString(C.Z3_fpa_get_numeral_significand_string(lit.ctx.c, lit.c))
