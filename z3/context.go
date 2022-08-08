@@ -61,7 +61,21 @@ type contextImpl struct {
 
 //export goZ3ErrorHandler
 func goZ3ErrorHandler(ctx C.Z3_context, e C.Z3_error_code) {
-	msg := C.Z3_get_error_msg_ex(ctx, e)
+	// For such a core function, Z3_get_error_msg has a tumultuous
+	// history of incompatible changes.
+	//
+	// Prior to z3 4.5.0, there were two get_error functions:
+	// Z3_get_error_msg with one argument and Z3_get_error_msg_ex
+	// with two arguments. Z3_get_error_msg was long deprecated
+	// and you were supposed to use Z3_get_error_msg_ex.
+	//
+	// z3 4.5.0 changed Z3_get_error_msg to take two arguments,
+	// just like Z3_get_error_msg_ex, and made the two equivalent.
+	//
+	// z3 4.8.1 dropped Z3_get_error_msg_ex in favor of
+	// Z3_get_error_msg.
+
+	msg := C.Z3_get_error_msg(ctx, e)
 	// TODO: Lift the Z3 errors to better Go errors. At least wrap
 	// the string in a type and consider using the error code to
 	// determine which of different error types to use.
