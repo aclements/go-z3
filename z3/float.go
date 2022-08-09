@@ -285,14 +285,8 @@ func (ctx *Context) floatFromInt(val int64, sort Sort) Float {
 				val = up
 			}
 		case RoundToNearestAway:
-			// Despite the name, Z3 implements this as
-			// "round to nearest odd". Bug in Z3?
 			if val == mid {
-				if down&1 == 0 {
-					val = up
-				} else {
-					val = down
-				}
+				val = up
 			} else if val < mid {
 				val = down
 			} else {
@@ -399,11 +393,7 @@ func (ctx *Context) floatFromBigInt(val *big.Int, sort Sort) Float {
 		case RoundToNearestAway:
 			switch x.Cmp(&mid) {
 			case 0:
-				if down.Bit(0) == 0 {
-					x = up
-				} else {
-					x = down
-				}
+				x = up
 			case -1:
 				x = down
 			case 1:

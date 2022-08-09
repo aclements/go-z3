@@ -44,11 +44,11 @@ func TestFloatFromIntRounding(t *testing.T) {
 	ctx := NewContext(nil)
 	isort := ctx.IntSort()
 	s := ctx.FloatSort(10, 4)
-	for _, sign := range []int64{1, -1} {
-		for x := int64(15); x < 64; x++ {
-			x := x * sign
-			for rm := RoundingMode(0); rm < roundingModesNum; rm++ {
-				ctx.SetRoundingMode(rm)
+	for rm := RoundingMode(0); rm < roundingModesNum; rm++ {
+		ctx.SetRoundingMode(rm)
+		for _, sign := range []int64{1, -1} {
+			for x := int64(15); x < 64; x++ {
+				x := x * sign
 				got, _, _ := ctx.Simplify(ctx.FromInt(x, s).(Float).ToReal().ToInt(), nil).(Int).AsInt64()
 
 				// Round it using Z3.
@@ -56,6 +56,7 @@ func TestFloatFromIntRounding(t *testing.T) {
 				y = ctx.Simplify(y, nil).(Int)
 				want, _, _ := y.AsInt64()
 
+				t.Logf("%d as float[10, 4] with rounding mode %v: z3 says %d", x, rm, want)
 				if got != want {
 					t.Errorf("%d as float[10, 4] with rounding mode %v: want %d, got %d", x, rm, want, got)
 				}
