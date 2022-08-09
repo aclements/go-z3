@@ -29,4 +29,4 @@ go get -u github.com/aclements/go-z3/z3
 Documentation
 =============
 
-See the [godoc](https://godoc.org/github.com/aclements/go-z3/z3).
+See [pkg.go.dev](https://pkg.go.dev/github.com/aclements/go-z3/z3).
