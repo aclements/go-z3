@@ -242,20 +242,22 @@ func (ctx *Context) floatFromInt(val int64, sort Sort) Float {
 		return ctx.FloatZero(sort, false)
 	}
 
-	if uint64(val)>>62 != 0 || testingFloatAlwaysFromBigInt {
-		// It's way too obnoxious to deal with overflow of
-		// large numbers below (especially if we have round
-		// val). Just fall back to the big.Int path.
-		return ctx.floatFromBigInt(big.NewInt(val), sort)
-	}
-
-	ebits, sbits := sort.FloatSize()
+	origVal := val
 
 	// Compute the sign bit.
 	neg := false
 	if val < 0 {
 		neg, val = true, -val
 	}
+
+	if uint64(val)>>62 != 0 || testingFloatAlwaysFromBigInt {
+		// It's way too obnoxious to deal with overflow of
+		// large numbers below (especially if we have round
+		// val). Just fall back to the big.Int path.
+		return ctx.floatFromBigInt(big.NewInt(origVal), sort)
+	}
+
+	ebits, sbits := sort.FloatSize()
 
 	// If val won't fit in sbits, round it.
 	var lost uint // Bits dropped from val.
