@@ -8,7 +8,7 @@ First, follow the instructions to
 [download and install](https://github.com/Z3Prover/z3/blob/master/README.md)
 the Z3 C library.
 
-go-z3 requires Z3 version 4.5.0 or later.
+go-z3 requires Z3 version 4.7.1 or later.
 
 If you installed the C library to a non-default location (such as a
 directory under `$HOME`), set the following environment variables:

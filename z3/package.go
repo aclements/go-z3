@@ -52,17 +52,19 @@
 package z3
 
 /*
-#include <z3.h>
+#include <stdbool.h>
 */
 import "C"
 
-func boolToZ3(b bool) C.Z3_bool {
-	if b {
-		return C.Z3_TRUE
-	}
-	return C.Z3_FALSE
+// As of z3 4.7.1, Z3_bool is just an alias for C bool (prior to this
+// it was an int, which is really why we have these functions). Z3
+// 4.11 drops Z3_bool entirely, so for maximum forwards-compatibility,
+// we use C bool.
+
+func boolToZ3(b bool) C.bool {
+	return C.bool(b)
 }
 
-func z3ToBool(b C.Z3_bool) bool {
-	return b != C.Z3_FALSE
+func z3ToBool(b C.bool) bool {
+	return bool(b)
 }
